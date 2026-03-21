@@ -90,18 +90,39 @@ CANVAS_H  = 202   # height
 CANVAS_CX = 66    # horizontal centre of canvas
 CANVAS_FOOT_Y = 202   # feet sit at bottom of canvas
 
-# ── Background masking (flood-fill from border) ──────────────────────────────
+# ── Background masking with antialiasing ─────────────────────────────────────
 def remove_black_bg(pil_img):
     import numpy as np
     from scipy import ndimage
-    from PIL import Image as PILImage
+    from PIL import Image as PILImage, ImageFilter
+
     a = np.array(pil_img.convert("RGBA"))
-    dark = (a[:,:,0]<15) & (a[:,:,1]<15) & (a[:,:,2]<15)
+
+    # Detect dark pixels with a slightly higher threshold for softer edge detection
+    dark = (a[:,:,0] < 20) & (a[:,:,1] < 20) & (a[:,:,2] < 20)
+
+    # Label connected regions
     lab, _ = ndimage.label(dark)
     h, w = dark.shape
-    border = set(lab[0,:].tolist()+lab[-1,:].tolist()+
-                 lab[:,0].tolist()+lab[:,-1].tolist()) - {0}
-    a[np.isin(lab, list(border)), 3] = 0
+
+    # Find border-connected regions
+    border = set(lab[0,:].tolist() + lab[-1,:].tolist() +
+                 lab[:,0].tolist() + lab[:,-1].tolist()) - {0}
+
+    # Create a mask for background pixels
+    bg_mask = np.isin(lab, list(border))
+
+    # Create distance transform for antialiasing
+    # Distance from foreground to background
+    distance = ndimage.distance_transform_edt(~bg_mask)
+
+    # Create smooth alpha transition (2-pixel feather for antialiasing)
+    feather_distance = 2.0
+    alpha_mult = np.clip(distance / feather_distance, 0, 1)
+
+    # Apply smooth alpha
+    a[:, :, 3] = (a[:, :, 3] * alpha_mult).astype(np.uint8)
+
     return PILImage.fromarray(a, "RGBA")
 
 # ── Load + scale sprites ──────────────────────────────────────────────────────
