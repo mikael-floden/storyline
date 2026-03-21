@@ -11,12 +11,53 @@ import sys, math, io, os
 import pygame
 import yaml
 
-SHEET_PATH = "actor/golem/sheet.png"
-FIRE_SHEET_PATH = "actor/firegolem/sheet.png"
+SHEET_PATH = "actor/golem2/sheet.png"
+FIRE_SHEET_PATH = "actor/firegolem2/sheet.png"
 PART_SCALE = 1      # each original pixel becomes PART_SCALE×PART_SCALE screen pixels
 FPS        = 60
+DISPLAY_MAX_W = 360
+DISPLAY_MAX_H = 440
 
 # ── Load driver configuration ─────────────────────────────────────────────────
+def compute_rig_metrics(crops, pivots):
+    """Derive rest-pose bounds and a safe display scale from driver data."""
+    min_x = min_y = 10**9
+    max_x = max_y = -10**9
+    max_part_dim = 0
+
+    for name, (x1, y1, x2, y2) in crops.items():
+        w, h = x2 - x1 + 1, y2 - y1 + 1
+        wx, wy, lx, ly = pivots[name]
+        px, py = wx - lx, wy - ly
+        min_x = min(min_x, px)
+        min_y = min(min_y, py)
+        max_x = max(max_x, px + w - 1)
+        max_y = max(max_y, py + h - 1)
+        max_part_dim = max(max_part_dim, w, h)
+
+    canvas_w = max_x - min_x + 1
+    canvas_h = max_y - min_y + 1
+    pad = max(40, max_part_dim // 3)
+    full_w = canvas_w + pad * 2
+    full_h = canvas_h + pad * 2
+    render_scale = min(1.0, DISPLAY_MAX_W / full_w, DISPLAY_MAX_H / full_h)
+
+    return {
+        "min_x": min_x,
+        "min_y": min_y,
+        "canvas_w": canvas_w,
+        "canvas_h": canvas_h,
+        "canvas_cx": min_x + canvas_w / 2.0,
+        "foot_y": max_y + 1.0,
+        "pad": pad,
+        "offset_x": pad - min_x,
+        "offset_y": pad - min_y,
+        "full_w": full_w,
+        "full_h": full_h,
+        "render_scale": render_scale,
+    }
+
+
 def load_driver(sheet_path):
     """Load crops, pivots, and draw_order from driver.yaml next to sheet.png"""
     driver_path = os.path.join(os.path.dirname(sheet_path), "driver.yaml")
@@ -28,15 +69,11 @@ def load_driver(sheet_path):
     pivots = {name: tuple(coords) for name, coords in data['pivots'].items()}
     draw_order = data['draw_order']
     eye_local = tuple(data['eye_local']) if 'eye_local' in data else None
+    metrics = compute_rig_metrics(crops, pivots)
 
-    return crops, pivots, draw_order, eye_local
+    return crops, pivots, draw_order, eye_local, metrics
 
 # ── 132×202 canvas metrics ───────────────────────────────────────────────────
-CANVAS_W  = 132   # width  of assembled golem in original pixels
-CANVAS_H  = 202   # height
-CANVAS_CX = 66    # horizontal centre of canvas
-CANVAS_FOOT_Y = 202   # feet sit at bottom of canvas
-
 # ── Background masking with antialiasing ─────────────────────────────────────
 def remove_black_bg(pil_img):
     import numpy as np
@@ -161,7 +198,7 @@ class Golem:
     WALK_SPD = 2.5
     RUN_SPD  = 5.5
 
-    def __init__(self, x, ground_y, mode="stone", pivots=None, eye_local=None):
+    def __init__(self, x, ground_y, mode="stone", pivots=None, eye_local=None, metrics=None, draw_order=None):
         self.x        = float(x)
         self.ground_y = float(ground_y)
         self.t        = 0.0
@@ -174,6 +211,8 @@ class Golem:
         self.mode     = mode        # "stone" or "fire"
         self.pivots   = pivots      # pivot data for current mode
         self.eye_local = eye_local  # eye position for fire mode
+        self.metrics  = metrics     # derived canvas metrics for current mode
+        self.draw_order = draw_order or []
 
     def jump(self):
         if self.on_gnd:
@@ -307,9 +346,12 @@ class Golem:
         # ── Offscreen canvas (golem-local space) ──────────────────────────
         # Canvas is CANVAS_W×CANVAS_H original pixels, scaled up.
         # We add padding to accommodate parts that swing outside the rest-pose box.
-        PAD   = 40   # padding in original-pixel units
-        GW    = (CANVAS_W  + PAD*2) * S
-        GH    = (CANVAS_H  + PAD   ) * S
+        metrics = self.metrics
+        PAD   = metrics["pad"]
+        off_x = metrics["offset_x"]
+        off_y = metrics["offset_y"]
+        GW    = max(1, int(math.ceil(metrics["full_w"] * S)))
+        GH    = max(1, int(math.ceil(metrics["full_h"] * S)))
         gsurf = pygame.Surface((GW, GH), pygame.SRCALPHA)
 
         # Helper: blit part at its rest-pose world pivot + optional angle.
@@ -317,9 +359,28 @@ class Golem:
         def gp(name, angle=0.0):
             wx, wy, lx, ly = pivots[name]
             blit_part(gsurf, sc(name), angle,
-                      wx + PAD, wy + PAD, lx, ly)
+                      wx + off_x, wy + off_y, lx, ly)
 
         lean = p["lean"]
+        part_angles = {
+            "shin_R": p["rl_lo"] * 0.4,
+            "leg_R_lo": p["rl_lo"],
+            "leg_R_up": p["rl_up"],
+            "arm_R_lo": p["ra_lo"] * 0.5,
+            "shldr_R": p["ra_up"] * 0.3 + lean * 0.5,
+            "arm_R_up": p["ra_up"],
+            "thigh_L": p["ll_th"],
+            "shin_L": p["ll_sh"],
+            "torso_lo": lean * 0.3,
+            "waist": lean * 0.3,
+            "torso": lean * 0.5,
+            "leg_L": p["ll_th"] * 0.6,
+            "arm_L_up": p["la_up"],
+            "arm_L_lo": p["la_lo"],
+            "hand_L": p["hand"],
+            "jaw": p["head"] + lean * 0.4 + p["jaw"] * 0.25,
+            "head": p["head"] + lean * 0.4,
+        }
 
         # ── Determine which arm/leg is "front" based on facing ────────────
         # The sprite sheet was drawn facing right.
@@ -327,34 +388,8 @@ class Golem:
         # When facing left (flipped): right becomes front.
         # We just draw and flip the whole canvas at the end.
 
-        # Back right leg
-        gp("shin_R",   p["rl_lo"]*0.4)
-        gp("leg_R_lo", p["rl_lo"])
-        gp("leg_R_up", p["rl_up"])
-
-        # Back right arm
-        gp("arm_R_lo", p["ra_lo"]*0.5)
-        gp("shldr_R",  p["ra_up"]*0.3 + lean*0.5)
-        gp("arm_R_up", p["ra_up"])
-
-        # Torso cluster
-        gp("thigh_L",  p["ll_th"])
-        gp("shin_L",   p["ll_sh"])
-        gp("torso_lo", lean*0.3)
-        gp("waist",    lean*0.3)
-        gp("torso",    lean*0.5)
-
-        # Front left leg
-        gp("leg_L",    p["ll_th"]*0.6)
-
-        # Front left arm
-        gp("arm_L_up", p["la_up"])
-        gp("arm_L_lo", p["la_lo"])
-        gp("hand_L",   p["hand"])
-
-        # Head
-        gp("jaw",  p["head"] + lean*0.4 + p["jaw"]*0.25)
-        gp("head", p["head"] + lean*0.4)
+        for name in self.draw_order:
+            gp(name, part_angles.get(name, 0.0))
 
         # ── Optional Eyes/Glow ────────────────────────────────────────────
         # If in fire mode, we can add extra eye-glow intensity
@@ -373,14 +408,14 @@ class Golem:
             rey = -ex*s + ey*c
             
             # World position on gsurf
-            gex = (wx + PAD + rex) * S
-            gey = (wy + PAD + rey) * S
+            gex = (wx + off_x + rex) * S
+            gey = (wy + off_y + rey) * S
             
             # Mirror if facing left
             if self.facing == -1:
-                # In gsurf, horizontal center is (CANVAS_CX + PAD) * S
+                # In gsurf, horizontal center is (canvas_cx + offset) * S
                 # gex reflection:
-                cx = (CANVAS_CX + PAD) * S
+                cx = (metrics["canvas_cx"] + off_x) * S
                 # gex_flipped = cx + (cx - gex) ... wait
                 # gsurf is flipped at the end, so we draw it on gsurf first.
                 pass 
@@ -391,17 +426,30 @@ class Golem:
         if self.facing == -1:
             gsurf = pygame.transform.flip(gsurf, True, False)
 
+        render_scale = metrics["render_scale"]
+        if render_scale != 1.0:
+            scaled_size = (
+                max(1, int(round(gsurf.get_width() * render_scale))),
+                max(1, int(round(gsurf.get_height() * render_scale))),
+            )
+            gsurf = pygame.transform.smoothscale(gsurf, scaled_size)
+
         # ── Blit composite to screen ──────────────────────────────────────
         # Anchor: golem feet = CANVAS_FOOT_Y+PAD in gsurf → FLOOR_Y+ay on screen
         # Horizontal: CANVAS_CX+PAD in gsurf → self.x on screen
-        blit_x = int(self.x) - (CANVAS_CX + PAD)*S
-        blit_y = int(self.ground_y) + ay + int(p["bob"]) - (CANVAS_FOOT_Y + PAD)*S
+        anchor_x = (metrics["canvas_cx"] + off_x) * S * render_scale
+        anchor_y = (metrics["foot_y"] + off_y) * S * render_scale
+        bob_y = (ay + int(p["bob"])) * render_scale
+        blit_x = int(round(self.x - anchor_x))
+        blit_y = int(round(self.ground_y + bob_y - anchor_y))
         surf.blit(gsurf, (blit_x, blit_y))
 
         # Ground shadow
-        shw = pygame.Surface((160, 22), pygame.SRCALPHA)
-        pygame.draw.ellipse(shw, (0,0,0,55), (0,0,160,22))
-        surf.blit(shw, (int(self.x)-80, int(self.ground_y)-8))
+        shw_w = max(80, int(160 * render_scale))
+        shw_h = max(12, int(22 * render_scale))
+        shw = pygame.Surface((shw_w, shw_h), pygame.SRCALPHA)
+        pygame.draw.ellipse(shw, (0,0,0,55), (0,0,shw_w,shw_h))
+        surf.blit(shw, (int(self.x) - shw_w//2, int(self.ground_y) - shw_h//3))
 
 # ── HUD ───────────────────────────────────────────────────────────────────────
 try:    hf = pygame.font.SysFont("monospace", 17)
@@ -425,15 +473,17 @@ def draw_hud(surf, state, mode):
 
 def main():
     # ── Load driver configurations ────────────────────────────────────────────────
-    stone_crops, stone_pivots, stone_draw_order, stone_eye_local = load_driver(SHEET_PATH)
-    fire_crops, fire_pivots, fire_draw_order, fire_eye_local = load_driver(FIRE_SHEET_PATH)
+    stone_crops, stone_pivots, stone_draw_order, stone_eye_local, stone_metrics = load_driver(SHEET_PATH)
+    fire_crops, fire_pivots, fire_draw_order, fire_eye_local, fire_metrics = load_driver(FIRE_SHEET_PATH)
 
     # ── Load both sprite sets ─────────────────────────────────────────────────────
     stone_sprites = load_sprites(SHEET_PATH, stone_crops)
     fire_sprites  = load_sprites(FIRE_SHEET_PATH, fire_crops)
 
     # ── Main loop ─────────────────────────────────────────────────────────────────
-    golem = Golem(W//2, FLOOR_Y, mode="stone", pivots=stone_pivots, eye_local=stone_eye_local)
+    golem = Golem(W//2, FLOOR_Y, mode="stone", pivots=stone_pivots,
+                  eye_local=stone_eye_local, metrics=stone_metrics,
+                  draw_order=stone_draw_order)
 
     while True:
         for ev in pygame.event.get():
@@ -447,10 +497,14 @@ def main():
                         golem.mode = "fire"
                         golem.pivots = fire_pivots
                         golem.eye_local = fire_eye_local
+                        golem.metrics = fire_metrics
+                        golem.draw_order = fire_draw_order
                     else:
                         golem.mode = "stone"
                         golem.pivots = stone_pivots
                         golem.eye_local = stone_eye_local
+                        golem.metrics = stone_metrics
+                        golem.draw_order = stone_draw_order
 
         keys = pygame.key.get_pressed()
         run  = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
