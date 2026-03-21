@@ -11,6 +11,7 @@ import sys, math, io
 import pygame
 
 SHEET_PATH = "actor/golem/golem_sheet.png"
+FIRE_SHEET_PATH = "actor/golem/fire_golem_sheet.png"
 PART_SCALE = 1      # each original pixel becomes PART_SCALE×PART_SCALE screen pixels
 FPS        = 60
 
@@ -183,11 +184,11 @@ def draw_glow(surf, cx, cy, r, col, intensity):
 pygame.init()
 W, H    = 960, 580
 screen  = pygame.display.set_mode((W, H))
-pygame.display.set_caption("Stone Golem")
+pygame.display.set_caption("Stone & Fire Golem")
 clock   = pygame.time.Clock()
 FLOOR_Y = H - 90
 
-sprites = load_sprites(SHEET_PATH)
+# sprites = load_sprites(SHEET_PATH)
 
 # ── Background ────────────────────────────────────────────────────────────────
 def build_bg():
@@ -214,7 +215,7 @@ class Golem:
     WALK_SPD = 2.5
     RUN_SPD  = 5.5
 
-    def __init__(self, x, ground_y):
+    def __init__(self, x, ground_y, mode="stone"):
         self.x        = float(x)
         self.ground_y = float(ground_y)
         self.t        = 0.0
@@ -224,6 +225,7 @@ class Golem:
         self.air_off  = 0.0
         self.on_gnd   = True
         self.squash   = 0.0
+        self.mode     = mode        # "stone" or "fire"
 
     def jump(self):
         if self.on_gnd:
@@ -335,7 +337,7 @@ class Golem:
                     lean=lean,   eye=eye)
 
     # ── Draw ──────────────────────────────────────────────────────────────────
-    def draw(self, surf):
+    def draw(self, surf, sprite_set):
         S   = PART_SCALE
         p   = self.pose()
         sq  = self.squash
@@ -346,7 +348,7 @@ class Golem:
         ssy = 1.0 - sq*0.18
 
         def sc(name):
-            spr = sprites[name]
+            spr = sprite_set[name]
             if sq < 0.01:
                 return spr
             return pygame.transform.scale(
@@ -405,7 +407,36 @@ class Golem:
         gp("jaw",  p["head"] + lean*0.4 + p["jaw"]*0.25)
         gp("head", p["head"] + lean*0.4)
 
-        # Eyes are baked into the head sprite - no extra drawing needed
+        # ── Optional Eyes/Glow ────────────────────────────────────────────
+        # If in fire mode, we can add extra eye-glow intensity
+        if self.mode == "fire":
+            # Find world position of head to place eye glow
+            wx, wy, lx, ly = PIVOTS["head"]
+            # Pivot (lx, ly) in head sprite is roughly the neck.
+            # Eyes are roughly at (36, 25) in original 73x68 head sprite.
+            # Local coordinates of eyes relative to head pivot (36, 67):
+            ex, ey = 36 - lx, 25 - ly
+            
+            # Rotate eyes relative to pivot
+            rad = math.radians(p["head"] + lean*0.4)
+            c, s = math.cos(rad), math.sin(rad)
+            rex = ex*c + ey*s
+            rey = -ex*s + ey*c
+            
+            # World position on gsurf
+            gex = (wx + PAD + rex) * S
+            gey = (wy + PAD + rey) * S
+            
+            # Mirror if facing left
+            if self.facing == -1:
+                # In gsurf, horizontal center is (CANVAS_CX + PAD) * S
+                # gex reflection:
+                cx = (CANVAS_CX + PAD) * S
+                # gex_flipped = cx + (cx - gex) ... wait
+                # gsurf is flipped at the end, so we draw it on gsurf first.
+                pass 
+            
+            draw_glow(gsurf, gex, gey, 12*S, (255, 100, 0), p["eye"])
 
         # ── Flip for left-facing ───────────────────────────────────────────
         if self.facing == -1:
@@ -427,9 +458,9 @@ class Golem:
 try:    hf = pygame.font.SysFont("monospace", 17)
 except: hf = pygame.font.Font(None, 19)
 
-def draw_hud(surf, state):
-    items = [("A/D","Move"), ("SHIFT","Run"), ("SPACE","Jump"), ("ESC","Quit"),
-             ("", f"[ {state.upper()} ]")]
+def draw_hud(surf, state, mode):
+    items = [("A/D","Move"), ("SHIFT","Run"), ("SPACE","Jump"), ("C","Switch Type"), ("ESC","Quit"),
+             ("", f"[ {mode.upper()} {state.upper()} ]")]
     x = y = 14
     for k, v in items:
         if k:
@@ -437,14 +468,19 @@ def draw_hud(surf, state):
             surf.blit(ks, (x, y))
             surf.blit(hf.render(" "+v, True, (70,65,58)), (x+ks.get_width(), y))
         else:
-            surf.blit(hf.render(v, True, (110,190,120)), (x, y))
+            surf.blit(hf.render(v, True, (110,190,120)) if mode == "stone" else hf.render(v, True, (255,140,40)), (x, y))
         y += 22
-    title = hf.render("STONE GOLEM  –  Verified Part-Based Sprite Rig", True, (48,42,36))
+    title_str = "STONE GOLEM" if mode == "stone" else "FIRE GOLEM"
+    title = hf.render(f"{title_str}  –  Verified Part-Based Sprite Rig", True, (48,42,36) if mode == "stone" else (80,40,20))
     surf.blit(title, (W//2 - title.get_width()//2, 12))
 
 def main():
+    # ── Load both sprite sets ─────────────────────────────────────────────────────
+    stone_sprites = load_sprites(SHEET_PATH)
+    fire_sprites  = load_sprites(FIRE_SHEET_PATH)
+
     # ── Main loop ─────────────────────────────────────────────────────────────────
-    golem = Golem(W//2, FLOOR_Y)
+    golem = Golem(W//2, FLOOR_Y, mode="stone")
 
     while True:
         for ev in pygame.event.get():
@@ -453,6 +489,8 @@ def main():
             if ev.type == pygame.KEYDOWN:
                 if ev.key == pygame.K_ESCAPE: pygame.quit(); sys.exit()
                 if ev.key == pygame.K_SPACE:  golem.jump()
+                if ev.key == pygame.K_c:
+                    golem.mode = "fire" if golem.mode == "stone" else "stone"
 
         keys = pygame.key.get_pressed()
         run  = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
@@ -464,8 +502,9 @@ def main():
         golem.update(dx != 0, run)
 
         screen.blit(bg_surf, (0,0))
-        golem.draw(screen)
-        draw_hud(screen, golem.state)
+        current_set = fire_sprites if golem.mode == "fire" else stone_sprites
+        golem.draw(screen, current_set)
+        draw_hud(screen, golem.state, golem.mode)
         pygame.display.flip()
         clock.tick(FPS)
 
