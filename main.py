@@ -10,67 +10,108 @@ Put the sprite sheet (renamed golem_sheet.png) next to this script.
 import sys, math, io
 import pygame
 
-SHEET_PATH = "actor/golem/golem_sheet.png"
-FIRE_SHEET_PATH = "actor/golem/fire_golem_sheet.png"
+SHEET_PATH = "actor/golem/sheet.png"
+FIRE_SHEET_PATH = "actor/firegolem/sheet.png"
 PART_SCALE = 1      # each original pixel becomes PART_SCALE×PART_SCALE screen pixels
 FPS        = 60
 
 # ── Sprite-sheet crop boxes  (x1, y1, x2, y2)  ──────────────────────────────
 # Identified by flood-fill blob detection + pixel-accurate template matching
 # against the 600×256 original sheet.
+# Stone sprite-sheet crop boxes.
 CROPS = {
-    "head":     (276,144,348,211),   # 73×68  skull
-    "jaw":      (276,213,346,250),   # 71×38  lower jaw / teeth
-    "arm_L_up": (256, 16,304, 77),   # 49×62  left upper arm  (has orange ring)
-    "arm_L_lo": (205, 80,260,137),   # 56×58  left lower arm / ball-fist
-    "hand_L":   (195,  6,253, 64),   # 59×59  left open claw
-    "arm_R_up": (202,144,253,197),   # 52×54  right upper arm (has orange ring)
-    "arm_R_lo": (316, 85,352,132),   # 37×48  right forearm stub
-    "shldr_R":  (445,166,488,198),   # 44×33  right shoulder plate (orange ring)
-    "torso":    (505, 88,564,139),   # 60×52  main torso
-    "torso_lo": (506, 21,567, 69),   # 62×49  lower torso with energy orb
-    "waist":    (508,159,558,184),   # 51×26  waist connector
-    "thigh_L":  (317, 18,348, 65),   # 32×48  left thigh / hip cylinder
-    "shin_L":   (437, 24,482, 63),   # 46×40  left shin
-    "leg_L":    (374,164,429,197),   # 56×34  left foot/ankle (orange ring)
-    "leg_R_up": (378,110,420,154),   # 43×45  right upper leg
-    "leg_R_lo": (208,209,244,250),   # 37×42  right lower leg (orange ring)
-    "shin_R":   (458,111,484,149),   # 27×39  right shin
+    "head":     (276,144,348,211),
+    "jaw":      (276,213,346,250),
+    "arm_L_up": (256, 16,304, 77),
+    "arm_L_lo": (205, 80,260,137),
+    "hand_L":   (195,  6,253, 64),
+    "arm_R_up": (202,144,253,197),
+    "arm_R_lo": (316, 85,352,132),
+    "shldr_R":  (445,166,488,198),
+    "torso":    (505, 88,564,139),
+    "torso_lo": (506, 21,567, 69),
+    "waist":    (508,159,558,184),
+    "thigh_L":  (317, 18,348, 65),
+    "shin_L":   (437, 24,482, 63),
+    "leg_L":    (374,164,429,197),
+    "leg_R_up": (378,110,420,154),
+    "leg_R_lo": (208,209,244,250),
+    "shin_R":   (458,111,484,149),
 }
 
-# ── Pivot table  (world_x, world_y, local_x, local_y)  ─────────────────────
+# Fire sprite-sheet crop boxes derived from actor/firegolem/firegolem.png.
+FIRE_CROPS = {
+    "hand_L":   (139, 15,203, 76),
+    "arm_L_up": (199, 16,256, 88),
+    "arm_R_up": (263, 21,305, 78),
+    "thigh_L":  (323, 30,362, 79),
+    "torso_lo": (422, 31,478, 76),
+    "shin_L":   (370, 34,418, 77),
+    "arm_L_lo": (152, 93,215,155),
+    "arm_R_lo": (257, 97,301,153),
+    "torso":    (426,103,488,157),
+    "leg_R_up": (314,126,360,176),
+    "shin_R":   (386,129,413,172),
+    "leg_R_lo": (144,160,202,229),
+    "head":     (220,163,310,253),
+    "leg_L":    (325,184,403,223),
+    "waist":    (418,184,482,221),
+    "shldr_R":  (148,240,202,291),
+    "jaw":      (223,252,316,296),
+}
+
+# Pivot table  (world_x, world_y, local_x, local_y)
 # Derived from pixel-accurate template matching:
 #   world_pivot = template_top_left + local_pivot
 # Verified: at angle=0, blit places the sprite exactly at template position.
 #
 # Natural pivot choices:
-#   • orange connector ring  → actual mechanical joint
-#   • top-centre             → segment hangs downward
-#   • bottom-centre          → segment pivots upward (e.g. head neck)
-#   • centre                 → free-floating part
+#   orange connector ring -> actual mechanical joint
+#   top-centre            -> segment hangs downward
+#   bottom-centre         -> segment pivots upward (e.g. head neck)
+#   centre                -> free-floating part
 PIVOTS = {
-    # world   local
-    "head":     ( 87, 68, 36, 67),   # neck at head bottom-centre
-    "jaw":      ( 92, 50, 35,  0),   # jaw top-centre
-    "arm_L_up": ( 24, 78, 24, 21),   # left shoulder orange ring
-    "arm_L_lo": ( 40, 95, 28,  0),   # left elbow top-centre
-    "hand_L":   ( 36, 50, 30, 30),   # left wrist centre
-    "arm_R_up": ( 53,117, 18,  6),   # right shoulder orange ring
-    "arm_R_lo": ( 97, 98, 18,  0),   # right elbow top-centre
-    "shldr_R":  ( 76, 98, 10,  4),   # right shoulder-plate orange ring
-    "torso":    ( 70, 94, 30, 26),   # torso centre
-    "torso_lo": ( 70, 84, 31, 25),   # lower torso centre
-    "waist":    ( 63, 79, 25, 13),   # waist centre
-    "thigh_L":  ( 76,154, 16,  0),   # left hip top-centre
-    "shin_L":   ( 60,156, 23,  0),   # left knee top-centre
-    "leg_L":    ( 42,173, 10,  5),   # left ankle orange ring
-    "leg_R_up": ( 84,122, 21,  0),   # right hip top-centre
-    "leg_R_lo": (109,125, 14,  4),   # right knee orange ring
-    "shin_R":   ( 47, 65, 13,  0),   # right shin top-centre
+    "head":     ( 87, 68, 36, 67),
+    "jaw":      ( 92, 50, 35,  0),
+    "arm_L_up": ( 24, 78, 24, 21),
+    "arm_L_lo": ( 40, 95, 28,  0),
+    "hand_L":   ( 36, 50, 30, 30),
+    "arm_R_up": ( 53,117, 18,  6),
+    "arm_R_lo": ( 97, 98, 18,  0),
+    "shldr_R":  ( 76, 98, 10,  4),
+    "torso":    ( 70, 94, 30, 26),
+    "torso_lo": ( 70, 84, 31, 25),
+    "waist":    ( 63, 79, 25, 13),
+    "thigh_L":  ( 76,154, 16,  0),
+    "shin_L":   ( 60,156, 23,  0),
+    "leg_L":    ( 42,173, 10,  5),
+    "leg_R_up": ( 84,122, 21,  0),
+    "leg_R_lo": (109,125, 14,  4),
+    "shin_R":   ( 47, 65, 13,  0),
 }
 
-# Draw order: back parts → torso → front parts
-# Determined by visual depth analysis of the assembled sprite.
+FIRE_PIVOTS = {
+    "hand_L":   ( 36, 50, 33, 32),
+    "arm_L_up": ( 24, 78, 28, 25),
+    "arm_R_up": ( 53,117, 15,  6),
+    "thigh_L":  ( 76,154, 20,  0),
+    "torso_lo": ( 70, 84, 28, 23),
+    "shin_L":   ( 60,156, 24,  0),
+    "arm_L_lo": ( 40, 95, 32,  0),
+    "arm_R_lo": ( 97, 98, 22,  0),
+    "torso":    ( 70, 94, 32, 28),
+    "leg_R_up": ( 84,122, 23,  0),
+    "shin_R":   ( 47, 65, 13,  0),
+    "leg_R_lo": (109,125, 22,  7),
+    "head":     ( 87, 68, 45, 90),
+    "leg_L":    ( 42,173, 14,  6),
+    "waist":    ( 63, 79, 32, 19),
+    "shldr_R":  ( 76, 98, 12,  6),
+    "jaw":      ( 92, 50, 46,  0),
+}
+
+FIRE_EYE_LOCAL = (45, 33)
+
 DRAW_ORDER = [
     # ── back ──────────────────────────────────────────────
     "leg_R_up", "leg_R_lo", "shin_R",   # right leg (behind)
@@ -127,7 +168,7 @@ def remove_black_bg(pil_img):
     return PILImage.fromarray(a, "RGBA")
 
 # ── Load + scale sprites ──────────────────────────────────────────────────────
-def load_sprites(path):
+def load_sprites(path, crops):
     from PIL import Image as PILImage
     try:
         raw = PILImage.open(path)
@@ -139,7 +180,7 @@ def load_sprites(path):
     buf = io.BytesIO(); masked.save(buf, "PNG"); buf.seek(0)
     sheet = pygame.image.load(buf).convert_alpha()
     out = {}
-    for name, (x1,y1,x2,y2) in CROPS.items():
+    for name, (x1,y1,x2,y2) in crops.items():
         w, h = x2-x1+1, y2-y1+1
         s = pygame.Surface((w,h), pygame.SRCALPHA)
         s.blit(sheet, (0,0), (x1,y1,w,h))
@@ -340,6 +381,7 @@ class Golem:
     def draw(self, surf, sprite_set):
         S   = PART_SCALE
         p   = self.pose()
+        pivots = FIRE_PIVOTS if self.mode == "fire" else PIVOTS
         sq  = self.squash
         ay  = int(self.air_off)
 
@@ -366,7 +408,7 @@ class Golem:
         # Helper: blit part at its rest-pose world pivot + optional angle.
         # PAD shifts the whole coordinate system right/down.
         def gp(name, angle=0.0):
-            wx, wy, lx, ly = PIVOTS[name]
+            wx, wy, lx, ly = pivots[name]
             blit_part(gsurf, sc(name), angle,
                       wx + PAD, wy + PAD, lx, ly)
 
@@ -411,11 +453,11 @@ class Golem:
         # If in fire mode, we can add extra eye-glow intensity
         if self.mode == "fire":
             # Find world position of head to place eye glow
-            wx, wy, lx, ly = PIVOTS["head"]
+            wx, wy, lx, ly = pivots["head"]
             # Pivot (lx, ly) in head sprite is roughly the neck.
             # Eyes are roughly at (36, 25) in original 73x68 head sprite.
             # Local coordinates of eyes relative to head pivot (36, 67):
-            ex, ey = 36 - lx, 25 - ly
+            ex, ey = FIRE_EYE_LOCAL[0] - lx, FIRE_EYE_LOCAL[1] - ly
             
             # Rotate eyes relative to pivot
             rad = math.radians(p["head"] + lean*0.4)
@@ -436,7 +478,7 @@ class Golem:
                 # gsurf is flipped at the end, so we draw it on gsurf first.
                 pass 
             
-            draw_glow(gsurf, gex, gey, 12*S, (255, 100, 0), p["eye"])
+            draw_glow(gsurf, gex, gey, 7*S, (255, 145, 40), 0.75 * p["eye"])
 
         # ── Flip for left-facing ───────────────────────────────────────────
         if self.facing == -1:
@@ -476,8 +518,8 @@ def draw_hud(surf, state, mode):
 
 def main():
     # ── Load both sprite sets ─────────────────────────────────────────────────────
-    stone_sprites = load_sprites(SHEET_PATH)
-    fire_sprites  = load_sprites(FIRE_SHEET_PATH)
+    stone_sprites = load_sprites(SHEET_PATH, CROPS)
+    fire_sprites  = load_sprites(FIRE_SHEET_PATH, FIRE_CROPS)
 
     # ── Main loop ─────────────────────────────────────────────────────────────────
     golem = Golem(W//2, FLOOR_Y, mode="stone")
