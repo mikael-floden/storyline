@@ -1,0 +1,9 @@
+[project]
+name = "storyline"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.11"
+dependencies = [
+    "pillow>=12.1.1",
+    "pygame>=2.6.1",
+]
