@@ -1,0 +1,66 @@
+# Fire Golem sprite sheet configuration
+# Crop boxes (x1, y1, x2, y2) - pixel coordinates in sheet.png
+crops:
+  hand_L: [139, 15, 203, 76]
+  arm_L_up: [199, 16, 256, 88]
+  arm_R_up: [263, 21, 305, 78]
+  thigh_L: [323, 30, 362, 79]
+  torso_lo: [422, 31, 478, 76]
+  shin_L: [370, 34, 418, 77]
+  arm_L_lo: [152, 93, 215, 155]
+  arm_R_lo: [257, 97, 301, 153]
+  torso: [426, 103, 488, 157]
+  leg_R_up: [314, 126, 360, 176]
+  shin_R: [386, 129, 413, 172]
+  leg_R_lo: [144, 160, 202, 229]
+  head: [220, 163, 310, 253]
+  leg_L: [325, 184, 403, 223]
+  waist: [418, 184, 482, 221]
+  shldr_R: [148, 240, 202, 291]
+  jaw: [223, 252, 316, 296]
+
+# Pivot table (world_x, world_y, local_x, local_y)
+pivots:
+  hand_L: [36, 50, 33, 32]
+  arm_L_up: [24, 78, 28, 25]
+  arm_R_up: [53, 117, 15, 6]
+  thigh_L: [76, 154, 20, 0]
+  torso_lo: [70, 84, 28, 23]
+  shin_L: [60, 156, 24, 0]
+  arm_L_lo: [40, 95, 32, 0]
+  arm_R_lo: [97, 98, 22, 0]
+  torso: [70, 94, 32, 28]
+  leg_R_up: [84, 122, 23, 0]
+  shin_R: [47, 65, 13, 0]
+  leg_R_lo: [109, 125, 22, 7]
+  head: [87, 68, 45, 90]
+  leg_L: [42, 173, 14, 6]
+  waist: [63, 79, 32, 19]
+  shldr_R: [76, 98, 12, 6]
+  jaw: [92, 50, 46, 0]
+
+# Drawing order (back to front) - same as stone golem
+draw_order:
+  # back
+  - leg_R_up
+  - leg_R_lo
+  - shin_R
+  - arm_R_lo
+  - shldr_R
+  - arm_R_up
+  # torso cluster
+  - thigh_L
+  - shin_L
+  - torso_lo
+  - waist
+  - torso
+  # front
+  - leg_L
+  - arm_L_up
+  - arm_L_lo
+  - hand_L
+  - jaw
+  - head
+
+# Fire golem specific settings
+eye_local: [45, 33]

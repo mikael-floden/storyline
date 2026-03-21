@@ -4,127 +4,32 @@ Stone Golem  –  Pygame part-based sprite animation
 =======================================================
 Controls:  A/D or ←/→  move  |  SHIFT  run  |  SPACE  jump  |  ESC  quit
 
-Requirements:  pip install pygame pillow scipy
+Requirements:  pip install pygame pillow scipy pyyaml
 Put the sprite sheet (renamed golem_sheet.png) next to this script.
 """
-import sys, math, io
+import sys, math, io, os
 import pygame
+import yaml
 
 SHEET_PATH = "actor/golem/sheet.png"
 FIRE_SHEET_PATH = "actor/firegolem/sheet.png"
 PART_SCALE = 1      # each original pixel becomes PART_SCALE×PART_SCALE screen pixels
 FPS        = 60
 
-# ── Sprite-sheet crop boxes  (x1, y1, x2, y2)  ──────────────────────────────
-# Identified by flood-fill blob detection + pixel-accurate template matching
-# against the 600×256 original sheet.
-# Stone sprite-sheet crop boxes.
-CROPS = {
-    "head":     (276,144,348,211),
-    "jaw":      (276,213,346,250),
-    "arm_L_up": (256, 16,304, 77),
-    "arm_L_lo": (205, 80,260,137),
-    "hand_L":   (195,  6,253, 64),
-    "arm_R_up": (202,144,253,197),
-    "arm_R_lo": (316, 85,352,132),
-    "shldr_R":  (445,166,488,198),
-    "torso":    (505, 88,564,139),
-    "torso_lo": (506, 21,567, 69),
-    "waist":    (508,159,558,184),
-    "thigh_L":  (317, 18,348, 65),
-    "shin_L":   (437, 24,482, 63),
-    "leg_L":    (374,164,429,197),
-    "leg_R_up": (378,110,420,154),
-    "leg_R_lo": (208,209,244,250),
-    "shin_R":   (458,111,484,149),
-}
+# ── Load driver configuration ─────────────────────────────────────────────────
+def load_driver(sheet_path):
+    """Load crops, pivots, and draw_order from driver.yaml next to sheet.png"""
+    driver_path = os.path.join(os.path.dirname(sheet_path), "driver.yaml")
+    with open(driver_path, 'r') as f:
+        data = yaml.safe_load(f)
 
-# Fire sprite-sheet crop boxes derived from actor/firegolem/firegolem.png.
-FIRE_CROPS = {
-    "hand_L":   (139, 15,203, 76),
-    "arm_L_up": (199, 16,256, 88),
-    "arm_R_up": (263, 21,305, 78),
-    "thigh_L":  (323, 30,362, 79),
-    "torso_lo": (422, 31,478, 76),
-    "shin_L":   (370, 34,418, 77),
-    "arm_L_lo": (152, 93,215,155),
-    "arm_R_lo": (257, 97,301,153),
-    "torso":    (426,103,488,157),
-    "leg_R_up": (314,126,360,176),
-    "shin_R":   (386,129,413,172),
-    "leg_R_lo": (144,160,202,229),
-    "head":     (220,163,310,253),
-    "leg_L":    (325,184,403,223),
-    "waist":    (418,184,482,221),
-    "shldr_R":  (148,240,202,291),
-    "jaw":      (223,252,316,296),
-}
+    # Convert lists to tuples for crops and pivots
+    crops = {name: tuple(coords) for name, coords in data['crops'].items()}
+    pivots = {name: tuple(coords) for name, coords in data['pivots'].items()}
+    draw_order = data['draw_order']
+    eye_local = tuple(data['eye_local']) if 'eye_local' in data else None
 
-# Pivot table  (world_x, world_y, local_x, local_y)
-# Derived from pixel-accurate template matching:
-#   world_pivot = template_top_left + local_pivot
-# Verified: at angle=0, blit places the sprite exactly at template position.
-#
-# Natural pivot choices:
-#   orange connector ring -> actual mechanical joint
-#   top-centre            -> segment hangs downward
-#   bottom-centre         -> segment pivots upward (e.g. head neck)
-#   centre                -> free-floating part
-PIVOTS = {
-    "head":     ( 87, 68, 36, 67),
-    "jaw":      ( 92, 50, 35,  0),
-    "arm_L_up": ( 24, 78, 24, 21),
-    "arm_L_lo": ( 40, 95, 28,  0),
-    "hand_L":   ( 36, 50, 30, 30),
-    "arm_R_up": ( 53,117, 18,  6),
-    "arm_R_lo": ( 97, 98, 18,  0),
-    "shldr_R":  ( 76, 98, 10,  4),
-    "torso":    ( 70, 94, 30, 26),
-    "torso_lo": ( 70, 84, 31, 25),
-    "waist":    ( 63, 79, 25, 13),
-    "thigh_L":  ( 76,154, 16,  0),
-    "shin_L":   ( 60,156, 23,  0),
-    "leg_L":    ( 42,173, 10,  5),
-    "leg_R_up": ( 84,122, 21,  0),
-    "leg_R_lo": (109,125, 14,  4),
-    "shin_R":   ( 47, 65, 13,  0),
-}
-
-FIRE_PIVOTS = {
-    "hand_L":   ( 36, 50, 33, 32),
-    "arm_L_up": ( 24, 78, 28, 25),
-    "arm_R_up": ( 53,117, 15,  6),
-    "thigh_L":  ( 76,154, 20,  0),
-    "torso_lo": ( 70, 84, 28, 23),
-    "shin_L":   ( 60,156, 24,  0),
-    "arm_L_lo": ( 40, 95, 32,  0),
-    "arm_R_lo": ( 97, 98, 22,  0),
-    "torso":    ( 70, 94, 32, 28),
-    "leg_R_up": ( 84,122, 23,  0),
-    "shin_R":   ( 47, 65, 13,  0),
-    "leg_R_lo": (109,125, 22,  7),
-    "head":     ( 87, 68, 45, 90),
-    "leg_L":    ( 42,173, 14,  6),
-    "waist":    ( 63, 79, 32, 19),
-    "shldr_R":  ( 76, 98, 12,  6),
-    "jaw":      ( 92, 50, 46,  0),
-}
-
-FIRE_EYE_LOCAL = (45, 33)
-
-DRAW_ORDER = [
-    # ── back ──────────────────────────────────────────────
-    "leg_R_up", "leg_R_lo", "shin_R",   # right leg (behind)
-    "arm_R_lo",                          # right forearm (behind torso)
-    "shldr_R",  "arm_R_up",              # right shoulder + arm
-    # ── torso cluster ─────────────────────────────────────
-    "thigh_L",  "shin_L",                # left leg thigh+shin (between torso + foot)
-    "torso_lo", "waist",    "torso",     # body core
-    # ── front ─────────────────────────────────────────────
-    "leg_L",                              # left foot (front)
-    "arm_L_up", "arm_L_lo", "hand_L",    # left arm + claw (frontmost)
-    "jaw",      "head",                  # head (topmost)
-]
+    return crops, pivots, draw_order, eye_local
 
 # ── 132×202 canvas metrics ───────────────────────────────────────────────────
 CANVAS_W  = 132   # width  of assembled golem in original pixels
@@ -256,7 +161,7 @@ class Golem:
     WALK_SPD = 2.5
     RUN_SPD  = 5.5
 
-    def __init__(self, x, ground_y, mode="stone"):
+    def __init__(self, x, ground_y, mode="stone", pivots=None, eye_local=None):
         self.x        = float(x)
         self.ground_y = float(ground_y)
         self.t        = 0.0
@@ -267,6 +172,8 @@ class Golem:
         self.on_gnd   = True
         self.squash   = 0.0
         self.mode     = mode        # "stone" or "fire"
+        self.pivots   = pivots      # pivot data for current mode
+        self.eye_local = eye_local  # eye position for fire mode
 
     def jump(self):
         if self.on_gnd:
@@ -381,7 +288,7 @@ class Golem:
     def draw(self, surf, sprite_set):
         S   = PART_SCALE
         p   = self.pose()
-        pivots = FIRE_PIVOTS if self.mode == "fire" else PIVOTS
+        pivots = self.pivots
         sq  = self.squash
         ay  = int(self.air_off)
 
@@ -451,13 +358,13 @@ class Golem:
 
         # ── Optional Eyes/Glow ────────────────────────────────────────────
         # If in fire mode, we can add extra eye-glow intensity
-        if self.mode == "fire":
+        if self.mode == "fire" and self.eye_local:
             # Find world position of head to place eye glow
             wx, wy, lx, ly = pivots["head"]
             # Pivot (lx, ly) in head sprite is roughly the neck.
             # Eyes are roughly at (36, 25) in original 73x68 head sprite.
             # Local coordinates of eyes relative to head pivot (36, 67):
-            ex, ey = FIRE_EYE_LOCAL[0] - lx, FIRE_EYE_LOCAL[1] - ly
+            ex, ey = self.eye_local[0] - lx, self.eye_local[1] - ly
             
             # Rotate eyes relative to pivot
             rad = math.radians(p["head"] + lean*0.4)
@@ -517,12 +424,16 @@ def draw_hud(surf, state, mode):
     surf.blit(title, (W//2 - title.get_width()//2, 12))
 
 def main():
+    # ── Load driver configurations ────────────────────────────────────────────────
+    stone_crops, stone_pivots, stone_draw_order, stone_eye_local = load_driver(SHEET_PATH)
+    fire_crops, fire_pivots, fire_draw_order, fire_eye_local = load_driver(FIRE_SHEET_PATH)
+
     # ── Load both sprite sets ─────────────────────────────────────────────────────
-    stone_sprites = load_sprites(SHEET_PATH, CROPS)
-    fire_sprites  = load_sprites(FIRE_SHEET_PATH, FIRE_CROPS)
+    stone_sprites = load_sprites(SHEET_PATH, stone_crops)
+    fire_sprites  = load_sprites(FIRE_SHEET_PATH, fire_crops)
 
     # ── Main loop ─────────────────────────────────────────────────────────────────
-    golem = Golem(W//2, FLOOR_Y, mode="stone")
+    golem = Golem(W//2, FLOOR_Y, mode="stone", pivots=stone_pivots, eye_local=stone_eye_local)
 
     while True:
         for ev in pygame.event.get():
@@ -532,7 +443,14 @@ def main():
                 if ev.key == pygame.K_ESCAPE: pygame.quit(); sys.exit()
                 if ev.key == pygame.K_SPACE:  golem.jump()
                 if ev.key == pygame.K_c:
-                    golem.mode = "fire" if golem.mode == "stone" else "stone"
+                    if golem.mode == "stone":
+                        golem.mode = "fire"
+                        golem.pivots = fire_pivots
+                        golem.eye_local = fire_eye_local
+                    else:
+                        golem.mode = "stone"
+                        golem.pivots = stone_pivots
+                        golem.eye_local = stone_eye_local
 
         keys = pygame.key.get_pressed()
         run  = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
