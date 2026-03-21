@@ -10,7 +10,7 @@ Put the sprite sheet (renamed golem_sheet.png) next to this script.
 import sys, math, io
 import pygame
 
-SHEET_PATH = "golem_sheet.png"
+SHEET_PATH = "actor/golem/golem_sheet.png"
 PART_SCALE = 1      # each original pixel becomes PART_SCALE×PART_SCALE screen pixels
 FPS        = 60
 
