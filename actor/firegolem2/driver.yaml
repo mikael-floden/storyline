@@ -1,0 +1,66 @@
+# Fire Golem 2 sprite sheet configuration
+# Crop boxes (x1, y1, x2, y2) - pixel coordinates in sheet.png
+crops:
+  hand_L: [424, 34, 633, 226]
+  arm_L_up: [603, 45, 781, 262]
+  arm_R_up: [804, 39, 943, 238]
+  thigh_L: [989, 86, 1115, 239]
+  shin_L: [1132, 96, 1283, 233]
+  torso_lo: [1310, 140, 1493, 232]
+  arm_L_lo: [460, 279, 660, 474]
+  arm_R_lo: [780, 295, 921, 465]
+  torso: [1299, 316, 1498, 487]
+  leg_R_up: [958, 385, 1106, 544]
+  shin_R: [1177, 395, 1268, 521]
+  leg_R_lo: [438, 482, 622, 683]
+  head: [665, 494, 940, 756]
+  leg_L: [992, 565, 1239, 685]
+  waist: [1274, 554, 1481, 672]
+  shldr_R: [452, 717, 624, 884]
+  jaw: [679, 766, 967, 902]
+
+# Pivot table (world_x, world_y, local_x, local_y)
+pivots:
+  leg_R_up: [186, 271, 73, 0]
+  leg_R_lo: [265, 418, 69, 20]
+  shin_R: [121, 153, 43, 0]
+  arm_R_lo: [253, 201, 69, 0]
+  shldr_R: [223, 261, 38, 19]
+  arm_R_up: [148, 311, 49, 21]
+  thigh_L: [181, 348, 64, 0]
+  shin_L: [189, 330, 74, 0]
+  torso_lo: [112, 175, 90, 46]
+  waist: [234, 217, 102, 60]
+  torso: [180, 306, 102, 88]
+  leg_L: [130, 428, 44, 18]
+  arm_L_up: [114, 173, 86, 75]
+  arm_L_lo: [187, 242, 100, 0]
+  hand_L: [198, 125, 107, 100]
+  jaw: [192, 102, 141, 0]
+  head: [230, 260, 136, 260]
+
+# Drawing order (back to front)
+draw_order:
+  # back
+  - leg_R_up
+  - shin_R
+  - shldr_R
+  # torso cluster
+  - thigh_L
+  - shin_L
+  - waist
+  - torso
+  - torso_lo
+  # front
+  - arm_R_lo
+  - leg_R_lo
+  - leg_L
+  - arm_L_up
+  - arm_L_lo
+  - arm_R_up
+  - hand_L
+  - head
+  - jaw
+
+
+eye_local: [136, 95]

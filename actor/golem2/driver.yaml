@@ -1,0 +1,64 @@
+# Stone Golem 2 sprite sheet configuration
+# Crop boxes (x1, y1, x2, y2) - pixel coordinates in sheet.png
+crops:
+  hand_L: [431, 38, 607, 208]
+  arm_L_up: [628, 70, 772, 243]
+  arm_L_lo: [461, 252, 624, 414]
+  arm_R_up: [455, 444, 605, 599]
+  arm_R_lo: [800, 277, 919, 411]
+  shldr_R: [1160, 518, 1292, 609]
+  torso: [1310, 270, 1469, 408]
+  torso_lo: [1306, 90, 1461, 226]
+  waist: [1323, 488, 1457, 585]
+  thigh_L: [809, 70, 897, 217]
+  shin_L: [1113, 80, 1258, 222]
+  leg_L: [955, 512, 1119, 611]
+  leg_R_up: [973, 362, 1105, 495]
+  leg_R_lo: [464, 630, 568, 743]
+  shin_R: [1192, 360, 1274, 477]
+  jaw: [679, 638, 886, 744]
+  head: [678, 445, 889, 632]
+
+# Pivot table (world_x, world_y, local_x, local_y)
+# Rest-pose top-left = world pivot - local pivot
+pivots:
+  hand_L: [75, 131, 90, 87]
+  arm_L_up: [39, 202, 71, 59]
+  arm_L_lo: [107, 257, 82, 0]
+  arm_R_up: [106, 296, 52, 17]
+  arm_R_lo: [205, 247, 58, 0]
+  shldr_R: [162, 241, 30, 11]
+  torso: [189, 211, 80, 70]
+  torso_lo: [151, 245, 78, 70]
+  waist: [161, 247, 66, 49]
+  thigh_L: [194, 362, 44, 0]
+  shin_L: [133, 464, 73, 0]
+  leg_L: [118, 472, 29, 15]
+  leg_R_up: [129, 316, 65, 0]
+  leg_R_lo: [204, 305, 40, 11]
+  shin_R: [54, 224, 40, 0]
+  jaw: [206, 113, 103, 0]
+  head: [190, 179, 105, 185]
+
+# Drawing order (back to front)
+draw_order:
+  # back
+  - leg_R_up
+  - shin_R
+  - shldr_R
+  # torso cluster
+  - thigh_L
+  - shin_L
+  - waist
+  - torso
+  - torso_lo
+  # front
+  - arm_R_lo
+  - leg_R_lo
+  - leg_L
+  - arm_L_up
+  - arm_L_lo
+  - arm_R_up
+  - hand_L
+  - head
+  - jaw
