@@ -32,6 +32,8 @@ animations:
         parts:
           part_18:  # torso - counter sway
             rotation: -3
+          part_05:  # jaw - tiny movement
+            rotation: 0.3
           part_10:  # left leg - forward
             rotation: -15
           part_17:  # left foot
@@ -48,6 +50,8 @@ animations:
         parts:
           part_18:
             rotation: 3
+          part_07:
+            rotation: 1.2
           part_10:  # left leg - back
             rotation: 12
           part_17:
@@ -64,6 +68,8 @@ animations:
         parts:
           part_18:
             rotation: -3
+          part_07:
+            rotation: 2.3
           part_10:
             rotation: -15
           part_17:
