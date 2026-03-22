@@ -11,8 +11,7 @@ import sys, math, io, os
 import pygame
 import yaml
 
-SHEET_PATH = "actor/golem2/sheet.png"
-FIRE_SHEET_PATH = "actor/firegolem2/sheet.png"
+ACTOR_ROOT = "actor"
 PART_SCALE = 1      # each original pixel becomes PART_SCALE×PART_SCALE screen pixels
 FPS        = 60
 DISPLAY_MAX_W = 360
@@ -72,6 +71,54 @@ def load_driver(sheet_path):
     metrics = compute_rig_metrics(crops, pivots)
 
     return crops, pivots, draw_order, eye_local, metrics
+
+
+def find_sheet_path(model_dir):
+    for filename in ("sheet.png", "sheet.jpg", "sheet.jpeg"):
+        path = os.path.join(model_dir, filename)
+        if os.path.isfile(path):
+            return path
+    return None
+
+
+def discover_models(actor_root):
+    """Find actor directories that have both driver.yaml and a sheet image."""
+    models = []
+    if not os.path.isdir(actor_root):
+        return models
+
+    for entry in sorted(os.scandir(actor_root), key=lambda item: item.name):
+        if not entry.is_dir():
+            continue
+
+        driver_path = os.path.join(entry.path, "driver.yaml")
+        if not os.path.isfile(driver_path):
+            continue
+
+        sheet_path = find_sheet_path(entry.path)
+        if not sheet_path:
+            continue
+
+        models.append({
+            "name": entry.name,
+            "sheet_path": sheet_path,
+        })
+
+    return models
+
+
+def load_model(model_spec):
+    crops, pivots, draw_order, eye_local, metrics = load_driver(model_spec["sheet_path"])
+    sprites = load_sprites(model_spec["sheet_path"], crops)
+    return {
+        "name": model_spec["name"],
+        "sheet_path": model_spec["sheet_path"],
+        "pivots": pivots,
+        "eye_local": eye_local,
+        "metrics": metrics,
+        "draw_order": draw_order,
+        "sprites": sprites,
+    }
 
 # ── 132×202 canvas metrics ───────────────────────────────────────────────────
 # ── Background masking with antialiasing ─────────────────────────────────────
@@ -167,11 +214,10 @@ def draw_glow(surf, cx, cy, r, col, intensity):
 pygame.init()
 W, H    = 960, 580
 screen  = pygame.display.set_mode((W, H))
-pygame.display.set_caption("Stone & Fire Golem")
+pygame.display.set_caption("Sprite Rig Viewer")
 clock   = pygame.time.Clock()
 FLOOR_Y = H - 90
 
-# sprites = load_sprites(SHEET_PATH)
 
 # ── Background ────────────────────────────────────────────────────────────────
 def build_bg():
@@ -213,6 +259,13 @@ class Golem:
         self.eye_local = eye_local  # eye position for fire mode
         self.metrics  = metrics     # derived canvas metrics for current mode
         self.draw_order = draw_order or []
+
+    def apply_model(self, model):
+        self.mode = model["name"]
+        self.pivots = model["pivots"]
+        self.eye_local = model["eye_local"]
+        self.metrics = model["metrics"]
+        self.draw_order = model["draw_order"]
 
     def jump(self):
         if self.on_gnd:
@@ -393,7 +446,7 @@ class Golem:
 
         # ── Optional Eyes/Glow ────────────────────────────────────────────
         # If in fire mode, we can add extra eye-glow intensity
-        if self.mode == "fire" and self.eye_local:
+        if self.eye_local:
             # Find world position of head to place eye glow
             wx, wy, lx, ly = pivots["head"]
             # Pivot (lx, ly) in head sprite is roughly the neck.
@@ -455,8 +508,10 @@ class Golem:
 try:    hf = pygame.font.SysFont("monospace", 17)
 except: hf = pygame.font.Font(None, 19)
 
-def draw_hud(surf, state, mode):
-    items = [("A/D","Move"), ("SHIFT","Run"), ("SPACE","Jump"), ("C","Switch Type"), ("ESC","Quit"),
+def draw_hud(surf, state, mode, has_glow):
+    accent = (255,140,40) if has_glow else (110,190,120)
+    title_color = (80,40,20) if has_glow else (48,42,36)
+    items = [("A/D","Move"), ("SHIFT","Run"), ("SPACE","Jump"), ("C","Next Model"), ("ESC","Quit"),
              ("", f"[ {mode.upper()} {state.upper()} ]")]
     x = y = 14
     for k, v in items:
@@ -465,25 +520,32 @@ def draw_hud(surf, state, mode):
             surf.blit(ks, (x, y))
             surf.blit(hf.render(" "+v, True, (70,65,58)), (x+ks.get_width(), y))
         else:
-            surf.blit(hf.render(v, True, (110,190,120)) if mode == "stone" else hf.render(v, True, (255,140,40)), (x, y))
+            surf.blit(hf.render(v, True, accent), (x, y))
         y += 22
-    title_str = "STONE GOLEM" if mode == "stone" else "FIRE GOLEM"
-    title = hf.render(f"{title_str}  –  Verified Part-Based Sprite Rig", True, (48,42,36) if mode == "stone" else (80,40,20))
+    title_str = mode.replace("_", " ").upper()
+    title = hf.render(f"{title_str}  –  Verified Part-Based Sprite Rig", True, title_color)
     surf.blit(title, (W//2 - title.get_width()//2, 12))
 
 def main():
     # ── Load driver configurations ────────────────────────────────────────────────
-    stone_crops, stone_pivots, stone_draw_order, stone_eye_local, stone_metrics = load_driver(SHEET_PATH)
-    fire_crops, fire_pivots, fire_draw_order, fire_eye_local, fire_metrics = load_driver(FIRE_SHEET_PATH)
+    model_specs = discover_models(ACTOR_ROOT)
+    if not model_specs:
+        print("\nERROR: no actor models with both driver.yaml and a sheet image were found.\n")
+        pygame.quit(); sys.exit(1)
+
+    models = [load_model(spec) for spec in model_specs]
+    current_index = next((i for i, model in enumerate(models) if model["name"] == "stone"), 0)
+    if current_index:
+        models = models[current_index:] + models[:current_index]
+        current_index = 0
 
     # ── Load both sprite sets ─────────────────────────────────────────────────────
-    stone_sprites = load_sprites(SHEET_PATH, stone_crops)
-    fire_sprites  = load_sprites(FIRE_SHEET_PATH, fire_crops)
+    current_model = models[current_index]
 
     # ── Main loop ─────────────────────────────────────────────────────────────────
-    golem = Golem(W//2, FLOOR_Y, mode="stone", pivots=stone_pivots,
-                  eye_local=stone_eye_local, metrics=stone_metrics,
-                  draw_order=stone_draw_order)
+    golem = Golem(W//2, FLOOR_Y, mode=current_model["name"], pivots=current_model["pivots"],
+                  eye_local=current_model["eye_local"], metrics=current_model["metrics"],
+                  draw_order=current_model["draw_order"])
 
     while True:
         for ev in pygame.event.get():
@@ -493,18 +555,9 @@ def main():
                 if ev.key == pygame.K_ESCAPE: pygame.quit(); sys.exit()
                 if ev.key == pygame.K_SPACE:  golem.jump()
                 if ev.key == pygame.K_c:
-                    if golem.mode == "stone":
-                        golem.mode = "fire"
-                        golem.pivots = fire_pivots
-                        golem.eye_local = fire_eye_local
-                        golem.metrics = fire_metrics
-                        golem.draw_order = fire_draw_order
-                    else:
-                        golem.mode = "stone"
-                        golem.pivots = stone_pivots
-                        golem.eye_local = stone_eye_local
-                        golem.metrics = stone_metrics
-                        golem.draw_order = stone_draw_order
+                    current_index = (current_index + 1) % len(models)
+                    current_model = models[current_index]
+                    golem.apply_model(current_model)
 
         keys = pygame.key.get_pressed()
         run  = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
@@ -516,9 +569,8 @@ def main():
         golem.update(dx != 0, run)
 
         screen.blit(bg_surf, (0,0))
-        current_set = fire_sprites if golem.mode == "fire" else stone_sprites
-        golem.draw(screen, current_set)
-        draw_hud(screen, golem.state, golem.mode)
+        golem.draw(screen, current_model["sprites"])
+        draw_hud(screen, golem.state, golem.mode, golem.eye_local is not None)
         pygame.display.flip()
         clock.tick(FPS)
 

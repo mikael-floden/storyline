@@ -22,8 +22,8 @@ crops:
 # Pivot table (world_x, world_y, local_x, local_y)
 # Rest-pose top-left = world pivot - local pivot
 pivots:
-  hand_L: [75, 131, 90, 87]
-  arm_L_up: [39, 202, 71, 59]
+  hand_L: [97, 157, 90, 87]
+  arm_L_up: [57, 194, 71, 59]
   arm_L_lo: [107, 257, 82, 0]
   arm_R_up: [106, 296, 52, 17]
   arm_R_lo: [205, 247, 58, 0]
@@ -37,8 +37,8 @@ pivots:
   leg_R_up: [129, 316, 65, 0]
   leg_R_lo: [204, 305, 40, 11]
   shin_R: [54, 224, 40, 0]
-  jaw: [206, 113, 103, 0]
-  head: [190, 179, 105, 185]
+  jaw: [200, 143, 103, 0]
+  head: [188, 187, 105, 185]
 
 # Drawing order (back to front)
 draw_order:
