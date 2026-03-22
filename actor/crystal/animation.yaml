@@ -1,177 +1,305 @@
-# Animation data for crystal golem
-# Each animation defines keyframes with part rotations and joint positions
-
 animations:
   idle:
     duration: 2.8
     loop: true
     keyframes:
-      - time: 0.0
-        parts: {}
-      - time: 1.4
-        parts:
-          part_10:  # root - gentle bob
-            rotation: -0.8
-          part_09:  # upper body - slight lean
-            rotation: 1.2
-          part_11:  # head - subtle nod
-            rotation: 1.5
-          part_19:  # jaw - tiny movement
-            rotation: 0.8
-          part_23:  # pelvis - breathing
-            rotation: 1.5
-          part_01:  # left arm
-            rotation: -0.8
-          part_17:  # right arm
-            rotation: 0.8
-          part_15:  # left leg
-            rotation: 0.2
-          part_12:  # right leg
-            rotation: -0.2
-      - time: 2.8
-        parts: {}
-
+    - time: 0.0
+      parts: {}
+    - time: 1.4
+      parts:
+        part_10:
+          rotation: -0.8
+        part_09:
+          rotation: 1.2
+        part_11:
+          rotation: 0.8
+        part_23:
+          rotation: 1.5
+        part_01:
+          rotation: -0.8
+        part_17:
+          rotation: 0.8
+        part_15:
+          rotation: 0.2
+        part_12:
+          rotation: -0.2
+    - time: 2.8
+      parts: {}
   walk:
     duration: 1.4
     loop: true
     keyframes:
-      - time: 0.0
-        parts:
-          part_10:  # root - up position
-            rotation: 0.5
-          part_09:  # upper body - lean forward slightly
-            rotation: 2
-          part_11:  # head - counter balance
-            rotation: -1.5
-          part_19:  # jaw - open more
-            rotation: 1.2
-          part_23:  # pelvis - tilt
-            rotation: -3
-          part_15:  # left leg - back
-            rotation: 12
-          part_16:  # left foot
-            rotation: -6
-          part_12:  # right leg - forward
-            rotation: -18
-          part_13:  # right lower leg
-            rotation: 8
-          part_01:  # left arm - minimal swing
-            rotation: -4
-          part_02:  # left lower arm
-            rotation: 2
-          part_17:  # right arm - minimal swing
-            rotation: 4
-          part_03:  # right lower arm
-            rotation: -2
-      - time: 0.35
-        parts:
-          part_10:
-            rotation: -0.5
-          part_09:
-            rotation: 1
-          part_11:
-            rotation: -0.5
-          part_19:  # jaw - slightly closed
-            rotation: 0.6
-          part_23:
-            rotation: 0
-          part_15:
-            rotation: -6
-          part_16:
-            rotation: 3
-          part_12:
-            rotation: -8
-          part_13:
-            rotation: 12
-          part_01:
-            rotation: -2
-          part_02:
-            rotation: 1
-          part_17:
-            rotation: 2
-          part_03:
-            rotation: -1
-      - time: 0.7
-        parts:
-          part_10:
-            rotation: 0.5
-          part_09:
-            rotation: 2
-          part_11:
-            rotation: -1.5
-          part_19:  # jaw - open
-            rotation: 1.2
-          part_23:
-            rotation: 3
-          part_15:  # left leg - forward
-            rotation: -18
-          part_16:
-            rotation: 8
-          part_12:  # right leg - back
-            rotation: 12
-          part_13:
-            rotation: -6
-          part_01:  # left arm - minimal swing
-            rotation: 4
-          part_02:
-            rotation: -2
-          part_17:  # right arm - minimal swing
-            rotation: -4
-          part_03:
-            rotation: 2
-      - time: 1.05
-        parts:
-          part_10:
-            rotation: -0.5
-          part_09:
-            rotation: 1
-          part_11:
-            rotation: -0.5
-          part_19:  # jaw - slightly closed
-            rotation: 0.6
-          part_23:
-            rotation: 0
-          part_15:
-            rotation: -8
-          part_16:
-            rotation: 12
-          part_12:
-            rotation: -6
-          part_13:
-            rotation: 3
-          part_01:
-            rotation: 2
-          part_02:
-            rotation: -1
-          part_17:
-            rotation: -2
-          part_03:
-            rotation: 1
-      - time: 1.4
-        parts:
-          part_10:
-            rotation: 0.5
-          part_09:
-            rotation: 2
-          part_11:
-            rotation: -1.5
-          part_19:  # jaw - open
-            rotation: 1.2
-          part_23:
-            rotation: -3
-          part_15:
-            rotation: 12
-          part_16:
-            rotation: -6
-          part_12:
-            rotation: -18
-          part_13:
-            rotation: 8
-          part_01:
-            rotation: -4
-          part_02:
-            rotation: 2
-          part_17:
-            rotation: 4
-          part_03:
-            rotation: -2
+    - time: 0.0
+      parts:
+        part_10:
+          rotation: 0.5
+        part_09:
+          rotation: 2
+        part_11:
+          rotation: 1.2
+        part_23:
+          rotation: -3
+        part_15:
+          rotation: 12
+        part_16:
+          rotation: -6
+        part_12:
+          rotation: -18
+        part_13:
+          rotation: 8
+        part_01:
+          rotation: -4
+        part_02:
+          rotation: 2
+        part_17:
+          rotation: 4
+        part_03:
+          rotation: -2
+    - time: 0.35
+      parts:
+        part_10:
+          rotation: -0.5
+        part_09:
+          rotation: 1
+        part_11:
+          rotation: 0.6
+        part_23:
+          rotation: 0
+        part_15:
+          rotation: -6
+        part_16:
+          rotation: 3
+        part_12:
+          rotation: -8
+        part_13:
+          rotation: 12
+        part_01:
+          rotation: -2
+        part_02:
+          rotation: 1
+        part_17:
+          rotation: 2
+        part_03:
+          rotation: -1
+    - time: 0.7
+      parts:
+        part_10:
+          rotation: 0.5
+        part_09:
+          rotation: 2
+        part_11:
+          rotation: 1.2
+        part_23:
+          rotation: 3
+        part_15:
+          rotation: -18
+        part_16:
+          rotation: 8
+        part_12:
+          rotation: 12
+        part_13:
+          rotation: -6
+        part_01:
+          rotation: 4
+        part_02:
+          rotation: -2
+        part_17:
+          rotation: -4
+        part_03:
+          rotation: 2
+    - time: 1.05
+      parts:
+        part_10:
+          rotation: -0.5
+        part_09:
+          rotation: 1
+        part_11:
+          rotation: 0.6
+        part_23:
+          rotation: 0
+        part_15:
+          rotation: -8
+        part_16:
+          rotation: 12
+        part_12:
+          rotation: -6
+        part_13:
+          rotation: 3
+        part_01:
+          rotation: 2
+        part_02:
+          rotation: -1
+        part_17:
+          rotation: -2
+        part_03:
+          rotation: 1
+    - time: 1.4
+      parts:
+        part_10:
+          rotation: 0.5
+        part_09:
+          rotation: 2
+        part_11:
+          rotation: 1.2
+        part_23:
+          rotation: -3
+        part_15:
+          rotation: 12
+        part_16:
+          rotation: -6
+        part_12:
+          rotation: -18
+        part_13:
+          rotation: 8
+        part_01:
+          rotation: -4
+        part_02:
+          rotation: 2
+        part_17:
+          rotation: 4
+        part_03:
+          rotation: -2
+  talk:
+    duration: 2.2
+    loop: true
+    keyframes:
+    - time: 0.0
+      parts:
+        part_11:
+          rotation: 0
+    - time: 0.25
+      parts:
+        part_11:
+          rotation: 20
+        part_10:
+          rotation: -0.4
+        part_09:
+          rotation: 0.9
+        part_23:
+          rotation: 0.6
+        part_01:
+          rotation: -0.6
+        part_17:
+          rotation: 0.5
+        part_15:
+          rotation: 0.15
+        part_12:
+          rotation: -0.1
+    - time: 0.5
+      parts:
+        part_11:
+          rotation: 7
+        part_10:
+          rotation: -0.6
+        part_09:
+          rotation: 1.1
+        part_23:
+          rotation: 0.8
+        part_01:
+          rotation: -0.8
+        part_17:
+          rotation: 0.7
+        part_15:
+          rotation: 0.2
+        part_12:
+          rotation: -0.15
+    - time: 0.75
+      parts:
+        part_11:
+          rotation: 25
+        part_10:
+          rotation: -0.3
+        part_09:
+          rotation: 0.7
+        part_23:
+          rotation: 0.5
+        part_01:
+          rotation: -0.5
+        part_17:
+          rotation: 0.4
+        part_15:
+          rotation: 0.1
+        part_12:
+          rotation: -0.2
+    - time: 1.0
+      parts:
+        part_11:
+          rotation: 10
+        part_10:
+          rotation: -0.5
+        part_09:
+          rotation: 1
+        part_23:
+          rotation: 0.7
+        part_01:
+          rotation: -0.7
+        part_17:
+          rotation: 0.6
+        part_15:
+          rotation: 0.18
+        part_12:
+          rotation: -0.12
+    - time: 1.3
+      parts:
+        part_11:
+          rotation: 22
+        part_10:
+          rotation: -0.4
+        part_09:
+          rotation: 0.8
+        part_23:
+          rotation: 0.6
+        part_01:
+          rotation: -0.55
+        part_17:
+          rotation: 0.45
+        part_15:
+          rotation: 0.12
+        part_12:
+          rotation: -0.18
+    - time: 1.6
+      parts:
+        part_11:
+          rotation: 5
+        part_10:
+          rotation: -0.6
+        part_09:
+          rotation: 1.1
+        part_23:
+          rotation: 0.75
+        part_01:
+          rotation: -0.75
+        part_17:
+          rotation: 0.65
+        part_15:
+          rotation: 0.22
+        part_12:
+          rotation: -0.1
+    - time: 1.9
+      parts:
+        part_11:
+          rotation: 24
+        part_10:
+          rotation: -0.35
+        part_09:
+          rotation: 0.75
+        part_23:
+          rotation: 0.55
+        part_01:
+          rotation: -0.6
+        part_17:
+          rotation: 0.5
+        part_15:
+          rotation: 0.14
+        part_12:
+          rotation: -0.16
+    - time: 2.2
+      parts:
+        part_11:
+          rotation: 0
+        part_10:
+          rotation: -0.5
+        part_09:
+          rotation: 0.9
+        part_23:
+          rotation: 0.65

@@ -184,3 +184,178 @@ animations:
             rotation: -2
           part_10:
             rotation: -4
+
+  talk:
+    duration: 1.8
+    loop: true
+    keyframes:
+      - time: 0.0
+        parts:
+          part_10:  # jaw/mouth area - closed
+            rotation: 0
+          part_01:  # head - neutral
+            rotation: 0
+      - time: 0.2
+        parts:
+          part_10:  # jaw - opening quickly (fire is energetic)
+            rotation: 30
+          part_01:  # head - slight flicker
+            rotation: 1.2
+          part_21:  # root - flickering energy
+            rotation: 1.5
+          part_20:  # upper body - flame sway
+            rotation: -2.5
+          part_13:  # left side - subtle movement
+            rotation: -1.8
+          part_07:  # right side - counter movement
+            rotation: 1.5
+          part_17:  # left arm - gesture
+            rotation: 3
+          part_09:  # right arm - gesture
+            rotation: -2.5
+          part_02:  # left leg
+            rotation: 0.3
+          part_06:  # right leg
+            rotation: -0.25
+      - time: 0.4
+        parts:
+          part_10:  # jaw - closing
+            rotation: 10
+          part_01:
+            rotation: 0.6
+          part_21:
+            rotation: -1.2
+          part_20:
+            rotation: 2.2
+          part_13:
+            rotation: 1.2
+          part_07:
+            rotation: -1
+          part_17:
+            rotation: 1.5
+          part_09:
+            rotation: -1.2
+          part_02:
+            rotation: 0.35
+          part_06:
+            rotation: -0.3
+      - time: 0.65
+        parts:
+          part_10:  # jaw - wide open
+            rotation: 35
+          part_01:
+            rotation: -0.8
+          part_21:
+            rotation: 1.8
+          part_20:
+            rotation: -3
+          part_13:
+            rotation: -2
+          part_07:
+            rotation: 1.7
+          part_17:
+            rotation: 4
+          part_09:
+            rotation: -3
+          part_02:
+            rotation: 0.25
+          part_06:
+            rotation: -0.2
+      - time: 0.9
+        parts:
+          part_10:  # jaw - partially closed
+            rotation: 14
+          part_01:
+            rotation: 0.4
+          part_21:
+            rotation: -0.8
+          part_20:
+            rotation: 1.8
+          part_13:
+            rotation: 0.9
+          part_07:
+            rotation: -0.8
+          part_17:
+            rotation: 2
+          part_09:
+            rotation: -1.5
+          part_02:
+            rotation: 0.32
+          part_06:
+            rotation: -0.28
+      - time: 1.15
+        parts:
+          part_10:  # jaw - open
+            rotation: 32
+          part_01:
+            rotation: 1
+          part_21:
+            rotation: 1.6
+          part_20:
+            rotation: -2.8
+          part_13:
+            rotation: -1.6
+          part_07:
+            rotation: 1.4
+          part_17:
+            rotation: 3.5
+          part_09:
+            rotation: -2.8
+          part_02:
+            rotation: 0.28
+          part_06:
+            rotation: -0.22
+      - time: 1.4
+        parts:
+          part_10:  # jaw - closing
+            rotation: 7
+          part_01:
+            rotation: 0.3
+          part_21:
+            rotation: -1
+          part_20:
+            rotation: 2
+          part_13:
+            rotation: 1
+          part_07:
+            rotation: -0.9
+          part_17:
+            rotation: 1.8
+          part_09:
+            rotation: -1.4
+          part_02:
+            rotation: 0.33
+          part_06:
+            rotation: -0.27
+      - time: 1.65
+        parts:
+          part_10:  # jaw - open wide again
+            rotation: 33
+          part_01:
+            rotation: -0.5
+          part_21:
+            rotation: 1.4
+          part_20:
+            rotation: -2.6
+          part_13:
+            rotation: -1.7
+          part_07:
+            rotation: 1.45
+          part_17:
+            rotation: 3.2
+          part_09:
+            rotation: -2.6
+          part_02:
+            rotation: 0.27
+          part_06:
+            rotation: -0.23
+      - time: 1.8
+        parts:
+          part_10:  # jaw - back to closed
+            rotation: 0
+          part_01:
+            rotation: 0
+          part_21:
+            rotation: 1
+          part_20:
+            rotation: -1.5
