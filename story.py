@@ -2,7 +2,7 @@
 """
 Story demo - Stone golem walking through Ashen Valley with parallax background.
 
-Controls: ESC quit
+Controls: SPACE speak sample line | ESC quit
 
 Requirements: pip install pygame pillow scipy pyyaml
 """
@@ -25,6 +25,7 @@ from main import (
 
 # Screen settings
 W, H = 960, 580
+SAMPLE_LINE = "The valley remembers every footstep."
 
 pygame.init()
 screen = pygame.display.set_mode((W, H))
@@ -48,6 +49,15 @@ def main():
 
     # Create background on the overscanned scene surface
     background = create_ashen_valley_background(camera.render_width, camera.render_height)
+    if background.metadata:
+        scene = background.metadata.get("scene", {})
+        canvas = scene.get("canvas", {})
+        canvas_height = canvas.get("height")
+        player_ground_y = scene.get("player_ground_y")
+        if canvas_height and player_ground_y is not None:
+            camera.set_actor_ground_y(
+                camera.render_height * (float(player_ground_y) / float(canvas_height))
+            )
     foreground_fog = ForegroundFog(
         camera.render_width,
         camera.render_height,
@@ -84,6 +94,8 @@ def main():
                 pygame.quit()
                 sys.exit()
             if ev.type == pygame.KEYDOWN:
+                if ev.key == pygame.K_SPACE:
+                    golem.speak(SAMPLE_LINE)
                 if ev.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
@@ -103,6 +115,7 @@ def main():
         scene_surface.fill((0, 0, 0, 0))
         background.draw(scene_surface)
         golem.draw(scene_surface, stone_model["sprites"])
+        background.draw_foreground(scene_surface)
         foreground_fog.draw(scene_surface)
         camera.draw(scene_surface, screen)
 

@@ -26,6 +26,7 @@ class ParallaxLayer:
         base_y: float | None = None,
         repeat_x: bool = True,
         repeat_step: float | None = None,
+        draw_phase: str = "background",
         mirror_x: bool = False,
         mirror_surface=None,
     ):
@@ -43,6 +44,7 @@ class ParallaxLayer:
         self.base_y = y_offset if base_y is None else base_y
         self.repeat_x = repeat_x
         self.repeat_step = surface.get_width() if repeat_step is None else repeat_step
+        self.draw_phase = draw_phase
         self.mirror_x = mirror_x
         self.mirror_surface = mirror_surface
         self.x_offset = 0.0
@@ -139,6 +141,7 @@ class ParallaxBackground(IBackgroundRenderer):
 
             placement = layer_meta.get("placement", {})
             mode = placement.get("mode", "tile")
+            draw_phase = layer_meta.get("draw_phase", "background")
 
             if mode in {"tile", "panorama_plate"}:
                 image_path = os.path.join(background_dir, layer_meta["file"])
@@ -147,6 +150,11 @@ class ParallaxBackground(IBackgroundRenderer):
                     continue
 
                 surface = pygame.image.load(image_path).convert_alpha()
+                if placement.get("crop_to_content"):
+                    surface = self._crop_surface_to_bbox(
+                        surface,
+                        layer_meta.get("content_bbox"),
+                    )
                 surface = self._scale_surface(surface, base_scale)
                 surface = self._apply_opacity(surface, placement.get("opacity", 1.0))
 
@@ -173,6 +181,7 @@ class ParallaxBackground(IBackgroundRenderer):
                         )
                         if repeat_x != "none"
                         else None,
+                        draw_phase=draw_phase,
                         mirror_x=mirror_x,
                         mirror_surface=pygame.transform.flip(surface, True, False)
                         if mirror_x
@@ -217,6 +226,7 @@ class ParallaxBackground(IBackgroundRenderer):
                 y_offset = self._scale_value(placement.get("y_offset", 0), base_scale)
                 repeat_every = instance.get("repeat_every")
                 repeat_x = repeat_every is not None or instance.get("repeat_x", False)
+                instance_draw_phase = instance.get("draw_phase", draw_phase)
 
                 base_x = anchor.get("x", 0.5) * self.screen_width
                 base_x -= pivot.get("x", 0.5) * object_surface.get_width()
@@ -236,6 +246,7 @@ class ParallaxBackground(IBackgroundRenderer):
                         repeat_step=self._scale_value(repeat_every, base_scale)
                         if repeat_every is not None
                         else None,
+                        draw_phase=instance_draw_phase,
                     )
                 )
 
@@ -272,7 +283,18 @@ class ParallaxBackground(IBackgroundRenderer):
         Args:
             surf: Pygame surface to draw on
         """
+        self._draw_layers(surf, draw_phase="background")
+
+    def draw_foreground(self, surf) -> None:
+        """Render foreground layers that should appear in front of actors."""
+        self._draw_layers(surf, draw_phase="foreground")
+
+    def _draw_layers(self, surf, draw_phase: str) -> None:
+        """Draw a subset of layers for a given phase."""
         for layer in self.layers:
+            if layer.draw_phase != draw_phase:
+                continue
+
             if not layer.repeat_x:
                 surf.blit(
                     layer.surface,
@@ -340,6 +362,16 @@ class ParallaxBackground(IBackgroundRenderer):
         new_width = max(1, int(round(surface.get_width() * scale_factor)))
         new_height = max(1, int(round(surface.get_height() * scale_factor)))
         return pygame.transform.smoothscale(surface, (new_width, new_height))
+
+    def _crop_surface_to_bbox(self, surface, bbox: dict | None):
+        """Crop a surface to a metadata bounding box."""
+        import pygame
+
+        if not bbox:
+            return surface
+
+        rect = pygame.Rect(bbox["x"], bbox["y"], bbox["w"], bbox["h"])
+        return surface.subsurface(rect).copy()
 
     def _scale_value(self, value: float, scale_factor: float) -> int:
         """Scale a metadata value from source-canvas pixels to screen pixels."""

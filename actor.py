@@ -7,6 +7,7 @@ Provides implementation for loading, animating, and rendering skeletal actors.
 import math
 
 from actor_interface import IActorRenderer
+from actor_speech import ActorSpeechController
 
 
 class Actor(IActorRenderer):
@@ -53,8 +54,13 @@ class Actor(IActorRenderer):
             anim_names = list(self.animations.keys())
             self.current_anim = anim_names[0] if anim_names else None
 
+        self._speech = ActorSpeechController()
+        self._speech_restore_anim = None
+        self._speech_animation_active = False
+
     def apply_model(self, model: dict) -> None:
         """Apply a loaded model to this actor."""
+        self.stop_speaking()
         self.mode = model["name"]
         self.pivots = model["pivots"]
         self.metrics = model["metrics"]
@@ -69,6 +75,8 @@ class Actor(IActorRenderer):
             self.anim_time = 0.0
             self.prev_anim = None
             self.blend_time = 0.0
+        self._speech_restore_anim = None
+        self._speech_animation_active = False
 
     def update(self, dt: float) -> None:
         """Update animation state."""
@@ -78,6 +86,9 @@ class Actor(IActorRenderer):
         # Update blend timer
         if self.blend_time < self.blend_duration:
             self.blend_time += dt
+
+        speech_active = self._speech.update()
+        self._sync_speech_animation(speech_active)
 
     def set_animation(self, anim_name: str) -> None:
         """Switch to a different animation with blending."""
@@ -90,6 +101,43 @@ class Actor(IActorRenderer):
             self.current_anim = anim_name
             self.anim_time = 0.0
             self.blend_time = 0.0
+
+    def speak(
+        self,
+        text: str,
+        *,
+        voice_name: str | None = None,
+        interrupt: bool = True,
+    ) -> bool:
+        """Start speaking text and switch to talk animation while active."""
+        started = self._speech.speak(text, voice_name=voice_name, interrupt=interrupt)
+        if started:
+            self._sync_speech_animation(True)
+        return started
+
+    def stop_speaking(self) -> None:
+        """Stop any active speech and restore the previous animation."""
+        self._speech.stop()
+        self._sync_speech_animation(False)
+
+    def _sync_speech_animation(self, speech_active: bool) -> None:
+        """Switch into or out of talk animation based on speech state."""
+        has_talk = "talk" in self.animations
+
+        if speech_active and has_talk:
+            if not self._speech_animation_active:
+                self._speech_restore_anim = self.current_anim
+                if self.current_anim != "talk":
+                    self.set_animation("talk")
+                self._speech_animation_active = True
+            return
+
+        if self._speech_animation_active:
+            restore_anim = self._speech_restore_anim
+            self._speech_restore_anim = None
+            self._speech_animation_active = False
+            if restore_anim and restore_anim in self.animations and restore_anim != self.current_anim:
+                self.set_animation(restore_anim)
 
     def compute_world_transforms(self, part_rotations: dict) -> dict:
         """Compute world-space position and rotation for each part considering hierarchy.

@@ -46,3 +46,13 @@ class IActorRenderer(ABC):
             model: Model data dictionary containing pivots, metrics, animations, etc.
         """
         pass
+
+    @abstractmethod
+    def speak(self, text: str, **kwargs) -> bool:
+        """Start speaking text and switch to the talk animation while active."""
+        pass
+
+    @abstractmethod
+    def stop_speaking(self) -> None:
+        """Stop active speech playback/synthesis."""
+        pass

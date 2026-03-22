@@ -72,6 +72,7 @@ class SceneCamera:
         self.motion_x = 0.0
         self.motion_y = 0.0
         self.zoom = base_zoom
+        self._actor_ground_y_override = None
 
     @property
     def actor_render_x(self) -> float:
@@ -82,6 +83,8 @@ class SceneCamera:
     @property
     def actor_ground_y(self) -> float:
         """Return the actor ground line on the overscanned render surface."""
+        if self._actor_ground_y_override is not None:
+            return self._actor_ground_y_override
         return self.render_margin_y + self.screen_height - self.floor_offset
 
     @property
@@ -121,6 +124,10 @@ class SceneCamera:
             + math.sin(self.time * 0.36 + 0.3) * self.zoom_amplitude
             + math.sin(self.time * 0.91 + 2.0) * (self.zoom_amplitude * 0.45)
         )
+
+    def set_actor_ground_y(self, ground_y: float) -> None:
+        """Set an absolute actor ground line on the render surface."""
+        self._actor_ground_y_override = ground_y
 
     def draw(self, scene_surface, target_surface) -> None:
         """Project the overscanned scene surface into the visible screen."""

@@ -10,7 +10,7 @@ scene:
     origin: top_left
   mood: cold ash basin with blue crystal glow, dead trees, mist, and wet stone
   horizon_y: 470
-  player_ground_y: 860
+  player_ground_y: 910
   safe_center_window:
     bbox:
       x: 420
@@ -25,6 +25,7 @@ default_scene_recipe:
     - Mirror-repeat the wide panorama plates instead of hard tiling them.
     - Use the prop sheets as extracted objects, not as full-width layers.
     - Foreground rock props repeat on one shared lane with staggered anchors so they never stack on top of each other.
+    - The repeated ground strip is the actual walk surface and should line up with `scene.player_ground_y`.
     - Keep heavy foreground props away from the bright center opening.
   stack:
     - sky
@@ -32,6 +33,7 @@ default_scene_recipe:
     - mid_basin
     - ground_plane
     - cloud_mist
+    - walk_ground
     - foreground_embankments
     - foreground_rocks
   instances:
@@ -350,9 +352,43 @@ layers:
           w: 240
           h: 210
 
+  - id: walk_ground
+    file: ground_repeat_x.png
+    role: walk_surface
+    parallax: 1.0
+    content_bbox:
+      x: 0
+      y: 445
+      w: 1536
+      h: 146
+    placement:
+      mode: tile
+      crop_to_content: true
+      repeat_x: seamless
+      align: bottom
+      y_offset: -18
+      opacity: 1.0
+    description: repeated stone walkway strip; this is the ground line the golem should visually walk on
+    objects:
+      - id: walk_surface
+        kind: walkable_ground
+        bbox:
+          x: 0
+          y: 445
+          w: 1536
+          h: 146
+      - id: contact_line
+        kind: foot_contact_band
+        bbox:
+          x: 0
+          y: 445
+          w: 1536
+          h: 10
+
   - id: foreground_embankments
     file: details2.png
     role: foreground_frame_sheet
+    draw_phase: foreground
     parallax: 0.72
     content_bbox:
       x: 18
@@ -411,6 +447,7 @@ layers:
   - id: foreground_rocks
     file: details.png
     role: foreground_prop_sheet
+    draw_phase: foreground
     parallax: 0.88
     content_bbox:
       x: 16
