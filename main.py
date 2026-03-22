@@ -18,13 +18,17 @@ DISPLAY_MAX_W = 360
 DISPLAY_MAX_H = 440
 
 # ── Load driver configuration ─────────────────────────────────────────────────
-def compute_rig_metrics(crops, pivots):
+def compute_rig_metrics(crops, pivots, draw_order=None):
     """Derive rest-pose bounds and a safe display scale from driver data."""
+    part_names = draw_order or list(crops.keys())
     min_x = min_y = 10**9
     max_x = max_y = -10**9
     max_part_dim = 0
 
-    for name, (x1, y1, x2, y2) in crops.items():
+    for name in part_names:
+        if name not in crops or name not in pivots:
+            continue
+        x1, y1, x2, y2 = crops[name]
         w, h = x2 - x1 + 1, y2 - y1 + 1
         wx, wy, lx, ly = pivots[name]
         px, py = wx - lx, wy - ly
@@ -33,6 +37,9 @@ def compute_rig_metrics(crops, pivots):
         max_x = max(max_x, px + w - 1)
         max_y = max(max_y, py + h - 1)
         max_part_dim = max(max_part_dim, w, h)
+
+    if min_x == 10**9:
+        raise ValueError("draw_order does not contain any valid parts")
 
     canvas_w = max_x - min_x + 1
     canvas_h = max_y - min_y + 1
@@ -67,7 +74,7 @@ def load_driver(sheet_path):
     crops = {name: tuple(coords) for name, coords in data['crops'].items()}
     pivots = {name: tuple(coords) for name, coords in data['pivots'].items()}
     draw_order = data['draw_order']
-    metrics = compute_rig_metrics(crops, pivots)
+    metrics = compute_rig_metrics(crops, pivots, draw_order)
 
     return crops, pivots, draw_order, metrics, driver_path
 
@@ -108,15 +115,17 @@ def discover_models(actor_root):
 
 def load_model(model_spec):
     crops, pivots, draw_order, metrics, driver_path = load_driver(model_spec["sheet_path"])
-    sprites = load_sprites(model_spec["sheet_path"], crops)
+    visible_crops = {name: crops[name] for name in draw_order if name in crops and name in pivots}
+    visible_pivots = {name: pivots[name] for name in draw_order if name in crops and name in pivots}
+    sprites = load_sprites(model_spec["sheet_path"], visible_crops)
     return {
         "name": model_spec["name"],
         "sheet_path": model_spec["sheet_path"],
         "driver_path": driver_path,
         "driver_mtime": os.path.getmtime(driver_path),
-        "pivots": pivots,
+        "pivots": visible_pivots,
         "metrics": metrics,
-        "draw_order": draw_order,
+        "draw_order": list(visible_crops.keys()),
         "sprites": sprites,
     }
 

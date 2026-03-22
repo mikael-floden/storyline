@@ -55,7 +55,7 @@ draw_order:
   - leg_L
   - arm_L_up
   - arm_L_lo
-  - hand_L
   - arm_R_up
   - head
   - jaw
+  - hand_L
