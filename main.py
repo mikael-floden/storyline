@@ -301,19 +301,7 @@ FLOOR_Y = H - 90
 
 def build_bg():
     bg = pygame.Surface((W, H))
-    bg.fill((12, 10, 8))
-    brick_w, brick_h = 64, 32
-    for gy in range(0, FLOOR_Y, brick_h):
-        for col in range(0, W, brick_w):
-            row = gy // brick_h
-            bx = col - (brick_w // 2 if row % 2 else 0)
-            tone = (22, 18, 14) if (row + col // brick_w) % 2 == 0 else (17, 14, 11)
-            pygame.draw.rect(bg, tone, (bx, gy, brick_w - 1, brick_h - 1))
-            pygame.draw.rect(bg, (8, 6, 4), (bx, gy, brick_w - 1, brick_h - 1), 1)
-    for gx in range(0, W, 80):
-        pygame.draw.rect(bg, (36, 30, 24), (gx, FLOOR_Y, 79, H - FLOOR_Y))
-        pygame.draw.rect(bg, (8, 6, 4), (gx, FLOOR_Y, 79, H - FLOOR_Y), 1)
-    pygame.draw.line(bg, (55, 45, 35), (0, FLOOR_Y - 1), (W, FLOOR_Y - 1), 2)
+    bg.fill((0, 0, 0))  # Pure black background
     return bg
 
 

@@ -39,3 +39,68 @@ animations:
             rotation: 2
       - time: 2.0
         parts: {}
+
+  walk:
+    duration: 1.0
+    loop: true
+    keyframes:
+      - time: 0.0
+        parts:
+          part_21:  # root - flickering bob
+            rotation: 2
+          part_20:  # upper body - sway
+            rotation: -5
+          part_01:  # head - flicker
+            rotation: 4
+          part_13:  # left leg - forward
+            rotation: -22
+          part_02:  # left foot
+            rotation: 12
+          part_07:  # right leg - back
+            rotation: 18
+          part_16:  # right foot
+            rotation: -10
+          part_17:  # left arm - swing back
+            rotation: 15
+          part_09:  # right arm - swing forward
+            rotation: -15
+      - time: 0.5
+        parts:
+          part_21:
+            rotation: 2
+          part_20:
+            rotation: 5
+          part_01:
+            rotation: -3
+          part_13:  # left leg - back
+            rotation: 18
+          part_02:
+            rotation: -10
+          part_07:  # right leg - forward
+            rotation: -22
+          part_16:
+            rotation: 12
+          part_17:  # left arm - swing forward
+            rotation: -15
+          part_09:  # right arm - swing back
+            rotation: 15
+      - time: 1.0
+        parts:
+          part_21:
+            rotation: 2
+          part_20:
+            rotation: -5
+          part_01:
+            rotation: 4
+          part_13:
+            rotation: -22
+          part_02:
+            rotation: 12
+          part_07:
+            rotation: 18
+          part_16:
+            rotation: -10
+          part_17:
+            rotation: 15
+          part_09:
+            rotation: -15

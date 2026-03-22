@@ -23,3 +23,56 @@ animations:
             rotation: -0.5
       - time: 3.0
         parts: {}
+
+  walk:
+    duration: 1.6
+    loop: true
+    keyframes:
+      - time: 0.0
+        parts:
+          part_18:  # torso - counter sway
+            rotation: -3
+          part_10:  # left leg - forward
+            rotation: -15
+          part_17:  # left foot
+            rotation: 8
+          part_12:  # right leg - back
+            rotation: 12
+          part_13:  # right foot
+            rotation: -5
+          part_01:  # left arm - swing back
+            rotation: 8
+          part_06:  # right arm - swing forward
+            rotation: -8
+      - time: 0.8
+        parts:
+          part_18:
+            rotation: 3
+          part_10:  # left leg - back
+            rotation: 12
+          part_17:
+            rotation: -5
+          part_12:  # right leg - forward
+            rotation: -15
+          part_13:
+            rotation: 8
+          part_01:  # left arm - swing forward
+            rotation: -8
+          part_06:  # right arm - swing back
+            rotation: 8
+      - time: 1.6
+        parts:
+          part_18:
+            rotation: -3
+          part_10:
+            rotation: -15
+          part_17:
+            rotation: 8
+          part_12:
+            rotation: 12
+          part_13:
+            rotation: -5
+          part_01:
+            rotation: 8
+          part_06:
+            rotation: -8
