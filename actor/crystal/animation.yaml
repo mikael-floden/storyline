@@ -43,8 +43,8 @@ animations:
             rotation: 2
           part_11:  # head - counter balance
             rotation: -1.5
-          part_19:  # jaw - slight open
-            rotation: 1
+          part_19:  # jaw - open more
+            rotation: 1.2
           part_23:  # pelvis - tilt
             rotation: -3
           part_15:  # left leg - back
@@ -55,14 +55,14 @@ animations:
             rotation: -18
           part_13:  # right lower leg
             rotation: 8
-          part_01:  # left arm - forward swing
-            rotation: -10
-          part_02:  # left lower arm
-            rotation: 4
-          part_17:  # right arm - back swing
-            rotation: 10
-          part_03:  # right lower arm
+          part_01:  # left arm - minimal swing
             rotation: -4
+          part_02:  # left lower arm
+            rotation: 2
+          part_17:  # right arm - minimal swing
+            rotation: 4
+          part_03:  # right lower arm
+            rotation: -2
       - time: 0.35
         parts:
           part_10:
@@ -71,8 +71,8 @@ animations:
             rotation: 1
           part_11:
             rotation: -0.5
-          part_19:
-            rotation: 0.5
+          part_19:  # jaw - slightly closed
+            rotation: 0.6
           part_23:
             rotation: 0
           part_15:
@@ -84,13 +84,13 @@ animations:
           part_13:
             rotation: 12
           part_01:
-            rotation: -6
-          part_02:
-            rotation: 2
-          part_17:
-            rotation: 6
-          part_03:
             rotation: -2
+          part_02:
+            rotation: 1
+          part_17:
+            rotation: 2
+          part_03:
+            rotation: -1
       - time: 0.7
         parts:
           part_10:
@@ -99,8 +99,8 @@ animations:
             rotation: 2
           part_11:
             rotation: -1.5
-          part_19:
-            rotation: 1
+          part_19:  # jaw - open
+            rotation: 1.2
           part_23:
             rotation: 3
           part_15:  # left leg - forward
@@ -111,14 +111,14 @@ animations:
             rotation: 12
           part_13:
             rotation: -6
-          part_01:  # left arm - back swing
-            rotation: 10
-          part_02:
-            rotation: -4
-          part_17:  # right arm - forward swing
-            rotation: -10
-          part_03:
+          part_01:  # left arm - minimal swing
             rotation: 4
+          part_02:
+            rotation: -2
+          part_17:  # right arm - minimal swing
+            rotation: -4
+          part_03:
+            rotation: 2
       - time: 1.05
         parts:
           part_10:
@@ -127,8 +127,8 @@ animations:
             rotation: 1
           part_11:
             rotation: -0.5
-          part_19:
-            rotation: 0.5
+          part_19:  # jaw - slightly closed
+            rotation: 0.6
           part_23:
             rotation: 0
           part_15:
@@ -140,13 +140,13 @@ animations:
           part_13:
             rotation: 3
           part_01:
-            rotation: 6
-          part_02:
-            rotation: -2
-          part_17:
-            rotation: -6
-          part_03:
             rotation: 2
+          part_02:
+            rotation: -1
+          part_17:
+            rotation: -2
+          part_03:
+            rotation: 1
       - time: 1.4
         parts:
           part_10:
@@ -155,8 +155,8 @@ animations:
             rotation: 2
           part_11:
             rotation: -1.5
-          part_19:
-            rotation: 1
+          part_19:  # jaw - open
+            rotation: 1.2
           part_23:
             rotation: -3
           part_15:
@@ -168,10 +168,10 @@ animations:
           part_13:
             rotation: 8
           part_01:
-            rotation: -10
-          part_02:
-            rotation: 4
-          part_17:
-            rotation: 10
-          part_03:
             rotation: -4
+          part_02:
+            rotation: 2
+          part_17:
+            rotation: 4
+          part_03:
+            rotation: -2

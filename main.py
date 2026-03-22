@@ -87,12 +87,13 @@ def load_animations(sheet_path):
     """Load animation data from animation.yaml next to the sheet."""
     anim_path = os.path.join(os.path.dirname(sheet_path), "animation.yaml")
     if not os.path.isfile(anim_path):
-        return {}
+        return {}, None, 0
 
+    mtime = os.path.getmtime(anim_path)
     with open(anim_path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
-    return data.get("animations", {})
+    return data.get("animations", {}), anim_path, mtime
 
 
 def find_sheet_path(model_dir):
@@ -192,13 +193,15 @@ def load_model(model_spec):
         metrics["render_scale"] = scale
 
     sprites = load_sprites(model_spec["sheet_path"], visible_crops)
-    animations = load_animations(model_spec["sheet_path"])
+    animations, anim_path, anim_mtime = load_animations(model_spec["sheet_path"])
 
     return {
         "name": model_spec["name"],
         "sheet_path": model_spec["sheet_path"],
         "driver_path": driver_path,
         "driver_mtime": os.path.getmtime(driver_path),
+        "anim_path": anim_path,
+        "anim_mtime": anim_mtime,
         "pivots": visible_pivots,
         "metrics": metrics,
         "draw_order": draw_order,
@@ -209,24 +212,50 @@ def load_model(model_spec):
 
 
 def try_reload_model(model):
-    """Reload a model if its driver has changed; keep the old version on failure."""
+    """Reload a model if its driver or animations have changed; keep the old version on failure."""
     driver_path = model["driver_path"]
-    try:
-        current_mtime = os.path.getmtime(driver_path)
-    except OSError:
-        return model, False
+    anim_path = model.get("anim_path")
 
-    if current_mtime <= model.get("driver_mtime", 0):
+    driver_changed = False
+    anim_changed = False
+
+    # Check driver.yaml
+    try:
+        current_driver_mtime = os.path.getmtime(driver_path)
+        if current_driver_mtime > model.get("driver_mtime", 0):
+            driver_changed = True
+    except OSError:
+        pass
+
+    # Check animation.yaml
+    if anim_path:
+        try:
+            current_anim_mtime = os.path.getmtime(anim_path)
+            if current_anim_mtime > model.get("anim_mtime", 0):
+                anim_changed = True
+        except OSError:
+            pass
+
+    if not driver_changed and not anim_changed:
         return model, False
 
     try:
         reloaded = load_model(model)
     except Exception as exc:
-        print(f"Driver reload failed for {model['name']}: {exc}")
-        model["driver_mtime"] = current_mtime
+        print(f"Reload failed for {model['name']}: {exc}")
+        if driver_changed:
+            model["driver_mtime"] = current_driver_mtime
+        if anim_changed:
+            model["anim_mtime"] = current_anim_mtime
         return model, False
 
-    print(f"Reloaded driver for {reloaded['name']}")
+    if driver_changed and anim_changed:
+        print(f"Reloaded driver and animations for {reloaded['name']}")
+    elif driver_changed:
+        print(f"Reloaded driver for {reloaded['name']}")
+    elif anim_changed:
+        print(f"Reloaded animations for {reloaded['name']}")
+
     return reloaded, True
 
 

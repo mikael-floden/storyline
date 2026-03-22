@@ -46,61 +46,141 @@ animations:
     keyframes:
       - time: 0.0
         parts:
-          part_21:  # root - flickering bob
-            rotation: 2
+          part_21:  # root - slight bob
+            rotation: 1.5
           part_20:  # upper body - sway
-            rotation: -5
-          part_01:  # head - flicker
-            rotation: 4
+            rotation: -4
+          part_01:  # head - very minimal
+            rotation: 0.5
+          part_08:  # head lower part
+            rotation: 0.3
           part_13:  # left leg - forward
-            rotation: -22
-          part_02:  # left foot
-            rotation: 12
-          part_07:  # right leg - back
+            rotation: -24
+          part_02:  # left lower leg - bend more
             rotation: 18
-          part_16:  # right foot
-            rotation: -10
+          part_22:  # left foot - lift more
+            rotation: 20
+          part_07:  # right leg - back
+            rotation: 20
+          part_06:  # right lower leg - bend
+            rotation: -12
           part_17:  # left arm - swing back
-            rotation: 15
+            rotation: 12
+          part_04:  # left lower arm
+            rotation: 4
           part_09:  # right arm - swing forward
-            rotation: -15
+            rotation: -1
+          part_10:  # right lower arm
+            rotation: -4
+      - time: 0.25
+        parts:
+          part_21:
+            rotation: 1
+          part_20:
+            rotation: -1
+          part_01:
+            rotation: 10.2
+          part_08:
+            rotation: 4.1
+          part_13:
+            rotation: -10
+          part_02:
+            rotation: 20
+          part_22:
+            rotation: 15
+          part_07:
+            rotation: 4
+          part_06:
+            rotation: 4
+          part_17:
+            rotation: 4
+          part_04:
+            rotation: 2
+          part_09:
+            rotation: -2
+          part_10:
+            rotation: -2
       - time: 0.5
         parts:
           part_21:
-            rotation: 2
+            rotation: 1.5
           part_20:
-            rotation: 5
+            rotation: 4
           part_01:
-            rotation: -3
+            rotation: -0.5
+          part_08:
+            rotation: -1.3
           part_13:  # left leg - back
-            rotation: 18
+            rotation: 20
           part_02:
-            rotation: -10
+            rotation: -12
+          part_22:
+            rotation: -8
           part_07:  # right leg - forward
-            rotation: -22
-          part_16:
-            rotation: 12
+            rotation: -24
+          part_06:
+            rotation: 18
           part_17:  # left arm - swing forward
-            rotation: -15
+            rotation: -12
+          part_04:
+            rotation: -4
           part_09:  # right arm - swing back
-            rotation: 15
+            rotation: 0
+          part_10:
+            rotation: 4
+      - time: 0.75
+        parts:
+          part_21:
+            rotation: 1
+          part_20:
+            rotation: 1
+          part_01:
+            rotation: -0.2
+          part_08:
+            rotation: -0.1
+          part_13:
+            rotation: 4
+          part_02:
+            rotation: 4
+          part_22:
+            rotation: 2
+          part_07:
+            rotation: -10
+          part_06:
+            rotation: 20
+          part_17:
+            rotation: -4
+          part_04:
+            rotation: -2
+          part_09:
+            rotation: 1
+          part_10:
+            rotation: 2
       - time: 1.0
         parts:
           part_21:
-            rotation: 2
+            rotation: 1.5
           part_20:
-            rotation: -5
+            rotation: -4
           part_01:
-            rotation: 4
+            rotation: 0.5
+          part_08:
+            rotation: 0.3
           part_13:
-            rotation: -22
+            rotation: -24
           part_02:
-            rotation: 12
-          part_07:
             rotation: 18
-          part_16:
-            rotation: -10
+          part_22:
+            rotation: 29
+          part_07:
+            rotation: 20
+          part_06:
+            rotation: -12
           part_17:
-            rotation: 15
+            rotation: 12
+          part_04:
+            rotation: 4
           part_09:
-            rotation: -15
+            rotation: -2
+          part_10:
+            rotation: -4
