@@ -61,6 +61,3 @@ draw_order:
   - hand_L
   - head
   - jaw
-
-# Fire golem specific settings
-eye_local: [45, 33]

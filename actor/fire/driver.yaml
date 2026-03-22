@@ -61,6 +61,3 @@ draw_order:
   - hand_L
   - head
   - jaw
-
-
-eye_local: [136, 95]

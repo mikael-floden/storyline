@@ -67,10 +67,9 @@ def load_driver(sheet_path):
     crops = {name: tuple(coords) for name, coords in data['crops'].items()}
     pivots = {name: tuple(coords) for name, coords in data['pivots'].items()}
     draw_order = data['draw_order']
-    eye_local = tuple(data['eye_local']) if 'eye_local' in data else None
     metrics = compute_rig_metrics(crops, pivots)
 
-    return crops, pivots, draw_order, eye_local, metrics
+    return crops, pivots, draw_order, metrics
 
 
 def find_sheet_path(model_dir):
@@ -108,13 +107,12 @@ def discover_models(actor_root):
 
 
 def load_model(model_spec):
-    crops, pivots, draw_order, eye_local, metrics = load_driver(model_spec["sheet_path"])
+    crops, pivots, draw_order, metrics = load_driver(model_spec["sheet_path"])
     sprites = load_sprites(model_spec["sheet_path"], crops)
     return {
         "name": model_spec["name"],
         "sheet_path": model_spec["sheet_path"],
         "pivots": pivots,
-        "eye_local": eye_local,
         "metrics": metrics,
         "draw_order": draw_order,
         "sprites": sprites,
@@ -198,18 +196,6 @@ def blit_part(surf, spr, angle_deg, wx, wy, lpx, lpy):
     surf.blit(rot, rect)
 
 # ── Eye-glow helper ───────────────────────────────────────────────────────────
-_gc: dict = {}
-def draw_glow(surf, cx, cy, r, col, intensity):
-    key = (r, col, round(intensity, 1))
-    if key not in _gc:
-        g = pygame.Surface((r*4, r*4), pygame.SRCALPHA)
-        for i in range(r, 0, -1):
-            a = int(200*intensity*(i/r)**0.6)
-            pygame.draw.circle(g, (*col, a), (r*2, r*2), i)
-        _gc[key] = g
-    surf.blit(_gc[key], (int(cx)-r*2, int(cy)-r*2),
-              special_flags=pygame.BLEND_ADD)
-
 # ── pygame init ───────────────────────────────────────────────────────────────
 pygame.init()
 W, H    = 960, 580
@@ -244,7 +230,7 @@ class Golem:
     WALK_SPD = 2.5
     RUN_SPD  = 5.5
 
-    def __init__(self, x, ground_y, mode="stone", pivots=None, eye_local=None, metrics=None, draw_order=None):
+    def __init__(self, x, ground_y, mode="stone", pivots=None, metrics=None, draw_order=None):
         self.x        = float(x)
         self.ground_y = float(ground_y)
         self.t        = 0.0
@@ -256,14 +242,12 @@ class Golem:
         self.squash   = 0.0
         self.mode     = mode        # "stone" or "fire"
         self.pivots   = pivots      # pivot data for current mode
-        self.eye_local = eye_local  # eye position for fire mode
         self.metrics  = metrics     # derived canvas metrics for current mode
         self.draw_order = draw_order or []
 
     def apply_model(self, model):
         self.mode = model["name"]
         self.pivots = model["pivots"]
-        self.eye_local = model["eye_local"]
         self.metrics = model["metrics"]
         self.draw_order = model["draw_order"]
 
@@ -313,7 +297,6 @@ class Golem:
             rl_up  = -math.sin(t*f*0.8)*4
             rl_lo  =  0.0
             lean   =  0.0
-            eye    = (math.sin(t*f*4)+1)/2*0.5 + 0.5
 
         elif self.state == "walk":
             p   = t * 0.08
@@ -330,7 +313,6 @@ class Golem:
             rl_up  =  math.sin(p)*32
             rl_lo  =  math.sin(p)*14
             lean   =  8.0 * self.facing
-            eye    =  1.0
 
         elif self.state == "run":
             p   = t * 0.15
@@ -347,7 +329,6 @@ class Golem:
             rl_up  =  math.sin(p)*50
             rl_lo  =  math.sin(p)*22
             lean   =  18.0 * self.facing
-            eye    =  1.0
 
         else:  # jump
             av = self.air_vel
@@ -365,7 +346,6 @@ class Golem:
             rl_up  =  28.0
             rl_lo  =  14.0
             lean   =  0.0
-            eye    =  1.0
 
         bob -= sq * 16.0   # squash on landing compresses bob
 
@@ -374,7 +354,7 @@ class Golem:
                     ra_up=ra_up, ra_lo=ra_lo,
                     ll_th=ll_th, ll_sh=ll_sh,
                     rl_up=rl_up, rl_lo=rl_lo,
-                    lean=lean,   eye=eye)
+                    lean=lean)
 
     # ── Draw ──────────────────────────────────────────────────────────────────
     def draw(self, surf, sprite_set):
@@ -446,35 +426,6 @@ class Golem:
 
         # ── Optional Eyes/Glow ────────────────────────────────────────────
         # If in fire mode, we can add extra eye-glow intensity
-        if self.eye_local:
-            # Find world position of head to place eye glow
-            wx, wy, lx, ly = pivots["head"]
-            # Pivot (lx, ly) in head sprite is roughly the neck.
-            # Eyes are roughly at (36, 25) in original 73x68 head sprite.
-            # Local coordinates of eyes relative to head pivot (36, 67):
-            ex, ey = self.eye_local[0] - lx, self.eye_local[1] - ly
-            
-            # Rotate eyes relative to pivot
-            rad = math.radians(p["head"] + lean*0.4)
-            c, s = math.cos(rad), math.sin(rad)
-            rex = ex*c + ey*s
-            rey = -ex*s + ey*c
-            
-            # World position on gsurf
-            gex = (wx + off_x + rex) * S
-            gey = (wy + off_y + rey) * S
-            
-            # Mirror if facing left
-            if self.facing == -1:
-                # In gsurf, horizontal center is (canvas_cx + offset) * S
-                # gex reflection:
-                cx = (metrics["canvas_cx"] + off_x) * S
-                # gex_flipped = cx + (cx - gex) ... wait
-                # gsurf is flipped at the end, so we draw it on gsurf first.
-                pass 
-            
-            draw_glow(gsurf, gex, gey, 7*S, (255, 145, 40), 0.75 * p["eye"])
-
         # ── Flip for left-facing ───────────────────────────────────────────
         if self.facing == -1:
             gsurf = pygame.transform.flip(gsurf, True, False)
@@ -544,7 +495,7 @@ def main():
 
     # ── Main loop ─────────────────────────────────────────────────────────────────
     golem = Golem(W//2, FLOOR_Y, mode=current_model["name"], pivots=current_model["pivots"],
-                  eye_local=current_model["eye_local"], metrics=current_model["metrics"],
+                  metrics=current_model["metrics"],
                   draw_order=current_model["draw_order"])
 
     while True:
@@ -570,7 +521,7 @@ def main():
 
         screen.blit(bg_surf, (0,0))
         golem.draw(screen, current_model["sprites"])
-        draw_hud(screen, golem.state, golem.mode, golem.eye_local is not None)
+        draw_hud(screen, golem.state, golem.mode, "fire" in golem.mode)
         pygame.display.flip()
         clock.tick(FPS)
 
