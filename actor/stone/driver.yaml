@@ -22,43 +22,40 @@ crops:
 # Pivot table (world_x, world_y, local_x, local_y)
 # Rest-pose top-left = world pivot - local pivot
 pivots:
-  hand_L: [97, 157, 90, 87]
-  arm_L_up: [57, 194, 71, 59]
-  arm_L_lo: [107, 257, 82, 0]
-  arm_R_up: [106, 296, 52, 17]
-  arm_R_lo: [205, 247, 58, 0]
-  shldr_R: [162, 241, 30, 11]
-  torso: [189, 211, 80, 70]
-  torso_lo: [151, 245, 78, 70]
-  waist: [161, 247, 66, 49]
-  thigh_L: [194, 362, 44, 0]
-  shin_L: [133, 464, 73, 0]
-  leg_L: [118, 472, 29, 15]
-  leg_R_up: [129, 316, 65, 0]
-  leg_R_lo: [204, 305, 40, 11]
-  shin_R: [54, 224, 40, 0]
-  jaw: [200, 143, 103, 0]
-  head: [188, 187, 105, 185]
+  hand_L: [90, 161, 110, 87]
+  arm_L_up: [51, 209, 71, 59]
+  arm_L_lo: [50, 291, 32, 0]
+  arm_R_up: [118, 382, 30, 37]
+  arm_R_lo: [190, 308, 28, 0]
+  shldr_R: [190, 470, 30, 11]
+  torso: [226, 315, 140, 70]
+  torso_lo: [170, 258, 78, 70]
+  waist: [160, 332, 66, 49]
+  thigh_L: [200, 332, 44, 0]
+  shin_L: [114, 380, 73, 0]
+  leg_L: [96, 489, 29, 15]
+  leg_R_up: [250, 360, 65, 0]
+  leg_R_lo: [252, 391, 40, 11]
+  shin_R: [240, 222, 40, 0]
+  jaw: [205, 132, 103, 0]
+  head: [192, 196, 105, 185]
 
 # Drawing order (back to front)
 draw_order:
-  # back
   - leg_R_up
   - shin_R
   - shldr_R
-  # torso cluster
   - thigh_L
   - shin_L
   - waist
+  - arm_R_lo
   - torso
   - torso_lo
-  # front
-  - arm_R_lo
   - leg_R_lo
   - leg_L
   - arm_L_up
   - arm_L_lo
-  - arm_R_up
   - hand_L
+  - arm_R_up
   - head
   - jaw

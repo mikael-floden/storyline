@@ -69,7 +69,7 @@ def load_driver(sheet_path):
     draw_order = data['draw_order']
     metrics = compute_rig_metrics(crops, pivots)
 
-    return crops, pivots, draw_order, metrics
+    return crops, pivots, draw_order, metrics, driver_path
 
 
 def find_sheet_path(model_dir):
@@ -107,16 +107,40 @@ def discover_models(actor_root):
 
 
 def load_model(model_spec):
-    crops, pivots, draw_order, metrics = load_driver(model_spec["sheet_path"])
+    crops, pivots, draw_order, metrics, driver_path = load_driver(model_spec["sheet_path"])
     sprites = load_sprites(model_spec["sheet_path"], crops)
     return {
         "name": model_spec["name"],
         "sheet_path": model_spec["sheet_path"],
+        "driver_path": driver_path,
+        "driver_mtime": os.path.getmtime(driver_path),
         "pivots": pivots,
         "metrics": metrics,
         "draw_order": draw_order,
         "sprites": sprites,
     }
+
+
+def try_reload_model(model):
+    """Reload a model if its driver has changed; keep the old version on failure."""
+    driver_path = model["driver_path"]
+    try:
+        current_mtime = os.path.getmtime(driver_path)
+    except OSError:
+        return model, False
+
+    if current_mtime <= model.get("driver_mtime", 0):
+        return model, False
+
+    try:
+        reloaded = load_model(model)
+    except Exception as exc:
+        print(f"Driver reload failed for {model['name']}: {exc}")
+        model["driver_mtime"] = current_mtime
+        return model, False
+
+    print(f"Reloaded driver for {reloaded['name']}")
+    return reloaded, True
 
 # ── 132×202 canvas metrics ───────────────────────────────────────────────────
 # ── Background masking with antialiasing ─────────────────────────────────────
@@ -499,6 +523,11 @@ def main():
                   draw_order=current_model["draw_order"])
 
     while True:
+        current_model, reloaded = try_reload_model(current_model)
+        if reloaded:
+            models[current_index] = current_model
+            golem.apply_model(current_model)
+
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
                 pygame.quit(); sys.exit()

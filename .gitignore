@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# uv
+.uv/
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+
+# Byte-compiled / optimized / DLL files
+*.pyc
+*.pyo
+
+# Development artifacts (prefixed with underscore)
+_*
+
+# OS
+.DS_Store
+Thumbs.db
+
+*.nul*.

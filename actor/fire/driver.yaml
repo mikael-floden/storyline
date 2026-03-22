@@ -41,23 +41,20 @@ pivots:
 
 # Drawing order (back to front)
 draw_order:
-  # back
   - leg_R_up
   - shin_R
   - shldr_R
-  # torso cluster
   - thigh_L
   - shin_L
   - waist
+  - arm_R_lo
   - torso
   - torso_lo
-  # front
-  - arm_R_lo
   - leg_R_lo
   - leg_L
   - arm_L_up
   - arm_L_lo
-  - arm_R_up
   - hand_L
+  - arm_R_up
   - head
   - jaw
