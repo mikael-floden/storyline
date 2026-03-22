@@ -17,7 +17,7 @@ import yaml
 
 from actor import Actor
 
-ACTOR_ROOT = "actor"
+ACTOR_ROOT = "actors"
 PART_SCALE = 1
 DISPLAY_MAX_W = 360
 DISPLAY_MAX_H = 440

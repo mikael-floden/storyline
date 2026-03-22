@@ -61,7 +61,7 @@ def main():
     foreground_fog = ForegroundFog(
         camera.render_width,
         camera.render_height,
-        os.path.join(os.path.dirname(__file__), "background", "ashen_valley"),
+        os.path.join(os.path.dirname(__file__), "backgrounds", "ashen_valley"),
     )
 
     # Create actor - start at left side of screen

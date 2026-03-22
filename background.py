@@ -389,7 +389,7 @@ def create_ashen_valley_background(screen_width: int, screen_height: int) -> Par
         Configured ParallaxBackground instance
     """
     bg = ParallaxBackground(screen_width, screen_height)
-    background_dir = os.path.join(os.path.dirname(__file__), "background", "ashen_valley")
+    background_dir = os.path.join(os.path.dirname(__file__), "backgrounds", "ashen_valley")
 
     for metadata_name in ("metadata.yaml", "metedata.yaml"):
         metadata_path = os.path.join(background_dir, metadata_name)
