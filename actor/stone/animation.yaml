@@ -1,0 +1,25 @@
+# Animation data for stone golem
+
+animations:
+  idle:
+    duration: 3.0
+    loop: true
+    keyframes:
+      - time: 0.0
+        parts: {}
+      - time: 1.5
+        parts:
+          part_19:  # body/root - slight bob
+            rotation: -1
+          part_18:  # torso - breathing expand
+            rotation: 2
+          part_01:  # left arm
+            rotation: -1
+          part_06:  # right arm
+            rotation: 1
+          part_10:  # left leg - subtle weight shift
+            rotation: 0.5
+          part_12:  # right leg - subtle weight shift
+            rotation: -0.5
+      - time: 3.0
+        parts: {}

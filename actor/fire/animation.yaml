@@ -1,0 +1,41 @@
+# Animation data for fire golem
+
+animations:
+  idle:
+    duration: 2.0
+    loop: true
+    keyframes:
+      - time: 0.0
+        parts: {}
+      - time: 0.5
+        parts:
+          part_21:  # root - quick flicker
+            rotation: 1
+          part_20:  # upper body
+            rotation: -2
+          part_01:  # head/top - flickering
+            rotation: 3
+          part_13:  # left side
+            rotation: -1.5
+          part_07:  # right side
+            rotation: 1.5
+      - time: 1.0
+        parts:
+          part_21:
+            rotation: -1
+          part_20:
+            rotation: 2
+          part_01:
+            rotation: -2
+          part_13:
+            rotation: 1
+          part_07:
+            rotation: -1
+      - time: 1.5
+        parts:
+          part_20:
+            rotation: -1
+          part_01:
+            rotation: 2
+      - time: 2.0
+        parts: {}

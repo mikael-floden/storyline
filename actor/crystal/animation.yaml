@@ -1,0 +1,28 @@
+# Animation data for crystal golem
+# Each animation defines keyframes with part rotations and joint positions
+
+animations:
+  idle:
+    duration: 2.5  # seconds
+    loop: true
+    keyframes:
+      - time: 0.0
+        parts: {}  # No rotation = rest pose
+      - time: 1.25
+        parts:
+          part_10:  # root - slight bob
+            rotation: -0.5
+          part_09:  # upper body
+            rotation: 1.5
+          part_23:  # pelvis/hips - breathing motion
+            rotation: 2
+          part_01:  # left arm group
+            rotation: -1
+          part_17:  # right arm group
+            rotation: 1
+          part_15:  # left leg
+            rotation: 0.3
+          part_12:  # right leg
+            rotation: -0.3
+      - time: 2.5
+        parts: {}

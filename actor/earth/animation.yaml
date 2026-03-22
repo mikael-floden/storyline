@@ -1,0 +1,29 @@
+# Animation data for earth golem
+
+animations:
+  idle:
+    duration: 3.5
+    loop: true
+    keyframes:
+      - time: 0.0
+        parts: {}
+      - time: 1.75
+        parts:
+          part_19:  # root - slow bob
+            rotation: -0.8
+          part_18:  # torso - breathing
+            rotation: 1.5
+          part_01:  # upper left side
+            rotation: -1
+          part_14:  # upper right side
+            rotation: 1
+          part_07:  # left leg
+            rotation: 0.4
+          part_16:  # right leg
+            rotation: -0.4
+          part_03:  # left arm chain
+            rotation: 0.5
+          part_02:  # right arm
+            rotation: -0.5
+      - time: 3.5
+        parts: {}
