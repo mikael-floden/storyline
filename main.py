@@ -188,8 +188,8 @@ def load_model(model_spec):
     # Compute metrics AFTER filtering to only visible (skeleton-connected) parts
     metrics = compute_rig_metrics(visible_crops, visible_pivots, draw_order)
 
-    # Override render_scale if scale is specified in driver
-    if scale != 1.0:
+    # Override render_scale with scale from driver (always apply it)
+    if scale is not None:
         metrics["render_scale"] = scale
 
     sprites = load_sprites(model_spec["sheet_path"], visible_crops)
@@ -394,6 +394,11 @@ class Golem:
         self.current_anim = None
         self.anim_time = 0.0
 
+        # Animation blending
+        self.prev_anim = None
+        self.blend_time = 0.0
+        self.blend_duration = 0.5  # 500ms blend time
+
         # Set default animation to idle if available
         if self.animations:
             anim_names = list(self.animations.keys())
@@ -412,17 +417,29 @@ class Golem:
             anim_names = list(self.animations.keys())
             self.current_anim = anim_names[0] if anim_names else None
             self.anim_time = 0.0
+            self.prev_anim = None
+            self.blend_time = 0.0
 
     def update(self, dt):
         """Update animation state."""
         if self.current_anim and self.current_anim in self.animations:
             self.anim_time += dt
 
+        # Update blend timer
+        if self.blend_time < self.blend_duration:
+            self.blend_time += dt
+
     def set_animation(self, anim_name):
-        """Switch to a different animation."""
+        """Switch to a different animation with blending."""
         if anim_name in self.animations and anim_name != self.current_anim:
+            # Store previous animation state for blending
+            self.prev_anim = self.current_anim
+            self.prev_anim_time = self.anim_time
+
+            # Switch to new animation
             self.current_anim = anim_name
             self.anim_time = 0.0
+            self.blend_time = 0.0
 
     def compute_world_transforms(self, part_rotations):
         """Compute world-space position and rotation for each part considering hierarchy."""
@@ -561,12 +578,36 @@ class Golem:
         part_rotations = {}
         if self.current_anim and self.current_anim in self.animations:
             anim = self.animations[self.current_anim]
-            part_rotations = interpolate_keyframes(
+            current_rotations = interpolate_keyframes(
                 anim.get("keyframes", []),
                 self.anim_time,
                 anim.get("duration", 1.0),
                 anim.get("loop", True)
             )
+
+            # Blend with previous animation if transitioning
+            if self.blend_time < self.blend_duration and self.prev_anim and self.prev_anim in self.animations:
+                prev_anim = self.animations[self.prev_anim]
+                prev_rotations = interpolate_keyframes(
+                    prev_anim.get("keyframes", []),
+                    self.prev_anim_time,
+                    prev_anim.get("duration", 1.0),
+                    prev_anim.get("loop", True)
+                )
+
+                # Blend factor (0 = prev, 1 = current)
+                blend_factor = self.blend_time / self.blend_duration
+
+                # Blend all parts
+                all_parts = set(current_rotations.keys()) | set(prev_rotations.keys())
+                part_rotations = {}
+                for part in all_parts:
+                    prev_rot = prev_rotations.get(part, {}).get("rotation", 0)
+                    curr_rot = current_rotations.get(part, {}).get("rotation", 0)
+                    blended_rot = prev_rot + (curr_rot - prev_rot) * blend_factor
+                    part_rotations[part] = {"rotation": blended_rot}
+            else:
+                part_rotations = current_rotations
 
         # Compute hierarchical transforms
         transforms = self.compute_world_transforms(part_rotations)
