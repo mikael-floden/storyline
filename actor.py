@@ -1,52 +1,12 @@
 """
 Actor module for 2D skeletal animation system.
 
-Provides a clean interface for loading, animating, and rendering skeletal actors.
+Provides implementation for loading, animating, and rendering skeletal actors.
 """
 
 import math
-from abc import ABC, abstractmethod
 
-
-class IActorRenderer(ABC):
-    """Interface for actor rendering - defines public API."""
-
-    @abstractmethod
-    def update(self, dt: float) -> None:
-        """Update animation state.
-
-        Args:
-            dt: Delta time in seconds
-        """
-        pass
-
-    @abstractmethod
-    def set_animation(self, anim_name: str) -> None:
-        """Switch to a different animation with blending.
-
-        Args:
-            anim_name: Name of animation to switch to
-        """
-        pass
-
-    @abstractmethod
-    def draw(self, surf, sprite_set: dict) -> None:
-        """Render the actor to a surface.
-
-        Args:
-            surf: Pygame surface to draw on
-            sprite_set: Dictionary of part name -> sprite surface
-        """
-        pass
-
-    @abstractmethod
-    def apply_model(self, model: dict) -> None:
-        """Apply a loaded model to this actor.
-
-        Args:
-            model: Model data dictionary containing pivots, metrics, animations, etc.
-        """
-        pass
+from actor_interface import IActorRenderer
 
 
 class Actor(IActorRenderer):
