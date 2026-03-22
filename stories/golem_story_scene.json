@@ -1,0 +1,731 @@
+{
+  "project": {
+    "title": "The Road Under Glass",
+    "version": "1.0",
+    "format": "2D side-scrolling cinematic",
+    "estimated_duration_seconds": 140,
+    "notes": {
+      "caption_style": "Bottom-screen captions only. No speech bubbles.",
+      "camera_style": "Mostly side view with slow cinematic pans and one subtle push-in.",
+      "environment": "Blue crystal cavern with layered parallax scrolling, rocky path, distant ruins, drifting ash and mist."
+    }
+  },
+  "characters": [
+    {
+      "id": "stone",
+      "name": "Stone",
+      "voice_style": "calm, deep, leader-like",
+      "default_state": "idle",
+      "walk_style": "slow, deliberate, heavy",
+      "idle_style": "steady breathing, grounded stance"
+    },
+    {
+      "id": "fire",
+      "name": "Fire",
+      "voice_style": "sharp, energetic, impatient",
+      "default_state": "idle",
+      "walk_style": "faster, aggressive, restless",
+      "idle_style": "weight shifting, restless motion"
+    },
+    {
+      "id": "crystal",
+      "name": "Crystal",
+      "voice_style": "quiet, precise, intuitive",
+      "default_state": "idle",
+      "walk_style": "smooth, light",
+      "idle_style": "soft stillness, attentive posture"
+    },
+    {
+      "id": "earth",
+      "name": "Earth",
+      "voice_style": "warm, low, stable",
+      "default_state": "idle",
+      "walk_style": "heavy but stable",
+      "idle_style": "broad, protective stance"
+    }
+  ],
+  "layers": [
+    {
+      "id": "L1_Sky",
+      "file": "01_AshenValley/L1_Sky.png",
+      "parallax_speed": 0.08
+    },
+    {
+      "id": "L2_FarMountains",
+      "file": "01_AshenValley/L2_FarMountains.png",
+      "parallax_speed": 0.2
+    },
+    {
+      "id": "L3_MidRuins",
+      "file": "01_AshenValley/L3_MidRuins.png",
+      "parallax_speed": 0.42
+    },
+    {
+      "id": "L4_NearRocks",
+      "file": "01_AshenValley/L4_NearRocks.png",
+      "parallax_speed": 0.68
+    },
+    {
+      "id": "L5_Ground",
+      "file": "01_AshenValley/L5_Ground.png",
+      "parallax_speed": 1.0
+    },
+    {
+      "id": "L6_FG_Ash",
+      "file": "01_AshenValley/L6_FG_Ash.png",
+      "parallax_speed": 1.25
+    }
+  ],
+  "scenes": [
+    {
+      "id": "scene_01_arrival",
+      "title": "Arrival",
+      "start": 0.0,
+      "end": 18.0,
+      "camera": {
+        "shot": "wide_side_scroll",
+        "movement": "slow_track_right"
+      },
+      "background_fx": [
+        {
+          "type": "mist",
+          "start": 0.0,
+          "end": 18.0,
+          "intensity": 0.35
+        },
+        {
+          "type": "ash",
+          "start": 0.0,
+          "end": 18.0,
+          "intensity": 0.2
+        }
+      ],
+      "character_setup": [
+        {
+          "character": "stone",
+          "start_position": {
+            "x": -180,
+            "y": 0
+          },
+          "z_order": 10
+        },
+        {
+          "character": "fire",
+          "start_position": {
+            "x": -260,
+            "y": 0
+          },
+          "z_order": 11
+        },
+        {
+          "character": "crystal",
+          "start_position": {
+            "x": -340,
+            "y": 0
+          },
+          "z_order": 12
+        },
+        {
+          "character": "earth",
+          "start_position": {
+            "x": -420,
+            "y": 0
+          },
+          "z_order": 13
+        }
+      ],
+      "events": [
+        {
+          "type": "move",
+          "start": 0.0,
+          "end": 10.0,
+          "direction": "right",
+          "characters": [
+            "stone",
+            "fire",
+            "crystal",
+            "earth"
+          ],
+          "speed_profile": {
+            "stone": 0.9,
+            "fire": 1.08,
+            "crystal": 0.96,
+            "earth": 0.88
+          },
+          "distance_px": 700
+        },
+        {
+          "type": "caption",
+          "start": 3.0,
+          "end": 9.0,
+          "speaker": "narrator",
+          "placement": "bottom_screen",
+          "text": "Beneath the mountain, where crystal remembers and ash forgets, four guardians followed an old road."
+        },
+        {
+          "type": "sfx",
+          "start": 10.0,
+          "end": 10.8,
+          "name": "low_rumble",
+          "volume": 0.65
+        },
+        {
+          "type": "state_change",
+          "start": 10.0,
+          "end": 12.0,
+          "characters": [
+            "stone",
+            "fire",
+            "crystal",
+            "earth"
+          ],
+          "state": "slow_to_stop"
+        },
+        {
+          "type": "state_change",
+          "start": 12.0,
+          "end": 18.0,
+          "characters": [
+            "stone",
+            "fire",
+            "crystal",
+            "earth"
+          ],
+          "state": "idle"
+        }
+      ]
+    },
+    {
+      "id": "scene_02_sound_in_the_dark",
+      "title": "The Sound in the Dark",
+      "start": 18.0,
+      "end": 42.0,
+      "camera": {
+        "shot": "medium_side_view",
+        "movement": "locked"
+      },
+      "events": [
+        {
+          "type": "look_at",
+          "start": 18.2,
+          "end": 19.0,
+          "source": "fire",
+          "target": "stone"
+        },
+        {
+          "type": "look_forward",
+          "start": 18.5,
+          "end": 19.5,
+          "character": "crystal"
+        },
+        {
+          "type": "look_down",
+          "start": 18.6,
+          "end": 19.4,
+          "character": "earth"
+        },
+        {
+          "type": "dialogue",
+          "start": 19.0,
+          "end": 22.0,
+          "speaker": "fire",
+          "target": "stone",
+          "placement": "bottom_screen",
+          "text": "Did you hear that? Something moved ahead of us."
+        },
+        {
+          "type": "dialogue",
+          "start": 22.5,
+          "end": 27.0,
+          "speaker": "stone",
+          "target": "fire",
+          "placement": "bottom_screen",
+          "text": "I heard the mountain answer. That does not mean it is speaking to us."
+        },
+        {
+          "type": "dialogue",
+          "start": 27.8,
+          "end": 30.5,
+          "speaker": "crystal",
+          "target": "all",
+          "placement": "bottom_screen",
+          "text": "No. Someone opened a path. Recently."
+        },
+        {
+          "type": "dialogue",
+          "start": 32.0,
+          "end": 33.8,
+          "speaker": "earth",
+          "target": "crystal",
+          "placement": "bottom_screen",
+          "text": "You can feel that?"
+        },
+        {
+          "type": "dialogue",
+          "start": 34.2,
+          "end": 37.2,
+          "speaker": "crystal",
+          "target": "earth",
+          "placement": "bottom_screen",
+          "text": "The crystals still carry the touch."
+        },
+        {
+          "type": "state_change",
+          "start": 18.0,
+          "end": 42.0,
+          "characters": [
+            "stone",
+            "fire",
+            "crystal",
+            "earth"
+          ],
+          "state": "idle"
+        }
+      ]
+    },
+    {
+      "id": "scene_03_decision",
+      "title": "Decision to Continue",
+      "start": 42.0,
+      "end": 65.0,
+      "camera": {
+        "shot": "medium_side_view",
+        "movement": "subtle_drift_right"
+      },
+      "events": [
+        {
+          "type": "look_forward",
+          "start": 42.0,
+          "end": 43.0,
+          "character": "stone"
+        },
+        {
+          "type": "micro_step",
+          "start": 43.0,
+          "end": 43.8,
+          "character": "fire",
+          "direction": "right",
+          "distance_px": 16
+        },
+        {
+          "type": "gesture",
+          "start": 44.0,
+          "end": 45.5,
+          "character": "earth",
+          "name": "hand_to_ground"
+        },
+        {
+          "type": "look_forward",
+          "start": 45.0,
+          "end": 46.0,
+          "character": "crystal"
+        },
+        {
+          "type": "dialogue",
+          "start": 46.0,
+          "end": 49.0,
+          "speaker": "earth",
+          "target": "stone",
+          "placement": "bottom_screen",
+          "text": "The road is stable. We can cross."
+        },
+        {
+          "type": "dialogue",
+          "start": 49.6,
+          "end": 52.0,
+          "speaker": "fire",
+          "target": "stone",
+          "placement": "bottom_screen",
+          "text": "Then stop listening to rocks and move."
+        },
+        {
+          "type": "dialogue",
+          "start": 52.6,
+          "end": 56.0,
+          "speaker": "stone",
+          "target": "fire",
+          "placement": "bottom_screen",
+          "text": "I am listening to the silence between them."
+        },
+        {
+          "type": "pause",
+          "start": 56.0,
+          "end": 57.0
+        },
+        {
+          "type": "dialogue",
+          "start": 57.0,
+          "end": 59.0,
+          "speaker": "stone",
+          "target": "all",
+          "placement": "bottom_screen",
+          "text": "We continue. Stay close."
+        },
+        {
+          "type": "move",
+          "start": 57.0,
+          "end": 65.0,
+          "direction": "right",
+          "characters": [
+            "stone",
+            "fire",
+            "crystal",
+            "earth"
+          ],
+          "speed_profile": {
+            "stone": 0.92,
+            "fire": 1.07,
+            "crystal": 0.97,
+            "earth": 0.9
+          },
+          "distance_px": 540
+        }
+      ]
+    },
+    {
+      "id": "scene_04_walking_conversation",
+      "title": "Walking Conversation",
+      "start": 65.0,
+      "end": 88.0,
+      "camera": {
+        "shot": "side_scroll_follow",
+        "movement": "follow_group"
+      },
+      "background_fx": [
+        {
+          "type": "ash",
+          "start": 65.0,
+          "end": 88.0,
+          "intensity": 0.3
+        }
+      ],
+      "events": [
+        {
+          "type": "move",
+          "start": 65.0,
+          "end": 82.0,
+          "direction": "right",
+          "characters": [
+            "stone",
+            "fire",
+            "crystal",
+            "earth"
+          ],
+          "speed_profile": {
+            "stone": 0.92,
+            "fire": 1.07,
+            "crystal": 0.97,
+            "earth": 0.9
+          },
+          "distance_px": 680
+        },
+        {
+          "type": "dialogue",
+          "start": 66.0,
+          "end": 69.0,
+          "speaker": "fire",
+          "target": "crystal",
+          "placement": "bottom_screen",
+          "text": "You always talk like the cave is alive."
+        },
+        {
+          "type": "dialogue",
+          "start": 69.6,
+          "end": 72.3,
+          "speaker": "crystal",
+          "target": "fire",
+          "placement": "bottom_screen",
+          "text": "It is alive. Just slower than you."
+        },
+        {
+          "type": "dialogue",
+          "start": 73.0,
+          "end": 75.0,
+          "speaker": "earth",
+          "target": "fire",
+          "placement": "bottom_screen",
+          "text": "Everything is slower than you."
+        },
+        {
+          "type": "reaction",
+          "start": 75.1,
+          "end": 76.0,
+          "character": "fire",
+          "name": "annoyed_glance"
+        },
+        {
+          "type": "dialogue",
+          "start": 79.0,
+          "end": 80.0,
+          "speaker": "stone",
+          "target": "all",
+          "placement": "bottom_screen",
+          "text": "Quiet."
+        },
+        {
+          "type": "state_change",
+          "start": 82.0,
+          "end": 88.0,
+          "characters": [
+            "stone",
+            "fire",
+            "crystal",
+            "earth"
+          ],
+          "state": "idle"
+        }
+      ]
+    },
+    {
+      "id": "scene_05_broken_arch",
+      "title": "The Broken Arch",
+      "start": 88.0,
+      "end": 115.0,
+      "camera": {
+        "shot": "wide_reveal_then_medium",
+        "movement": "reveal_arch_then_lock"
+      },
+      "background_fx": [
+        {
+          "type": "foreground_ash",
+          "start": 88.0,
+          "end": 115.0,
+          "intensity": 0.4
+        }
+      ],
+      "events": [
+        {
+          "type": "reveal",
+          "start": 88.0,
+          "end": 91.0,
+          "object": "ruined_arch_with_blue_glow"
+        },
+        {
+          "type": "caption",
+          "start": 91.0,
+          "end": 96.0,
+          "speaker": "narrator",
+          "placement": "bottom_screen",
+          "text": "They had reached the First Marker, where the old road divided the faithful from the lost."
+        },
+        {
+          "type": "micro_step",
+          "start": 96.2,
+          "end": 97.2,
+          "character": "crystal",
+          "direction": "right",
+          "distance_px": 18
+        },
+        {
+          "type": "dialogue",
+          "start": 97.5,
+          "end": 100.0,
+          "speaker": "crystal",
+          "target": "stone",
+          "placement": "bottom_screen",
+          "text": "This is the place from the memory shards."
+        },
+        {
+          "type": "dialogue",
+          "start": 100.6,
+          "end": 102.4,
+          "speaker": "stone",
+          "target": "crystal",
+          "placement": "bottom_screen",
+          "text": "Tell me what you see."
+        },
+        {
+          "type": "dialogue",
+          "start": 103.0,
+          "end": 106.0,
+          "speaker": "crystal",
+          "target": "stone",
+          "placement": "bottom_screen",
+          "text": "A gate. A fall. A promise unfinished."
+        },
+        {
+          "type": "dialogue",
+          "start": 106.8,
+          "end": 108.8,
+          "speaker": "fire",
+          "target": "all",
+          "placement": "bottom_screen",
+          "text": "I see a doorway. We open it."
+        },
+        {
+          "type": "dialogue",
+          "start": 109.5,
+          "end": 111.4,
+          "speaker": "earth",
+          "target": "fire",
+          "placement": "bottom_screen",
+          "text": "Or it opens us."
+        },
+        {
+          "type": "pause",
+          "start": 111.4,
+          "end": 113.4
+        },
+        {
+          "type": "dialogue",
+          "start": 113.4,
+          "end": 115.0,
+          "speaker": "crystal",
+          "target": "all",
+          "placement": "bottom_screen",
+          "text": "We are not the first to come here."
+        }
+      ]
+    },
+    {
+      "id": "scene_06_warning",
+      "title": "The Warning",
+      "start": 115.0,
+      "end": 130.0,
+      "camera": {
+        "shot": "medium_push_in",
+        "movement": "slow_push_in"
+      },
+      "events": [
+        {
+          "type": "light_pulse",
+          "start": 116.0,
+          "end": 116.8,
+          "source": "ruins_blue_glow",
+          "intensity": 0.7
+        },
+        {
+          "type": "dialogue",
+          "start": 117.0,
+          "end": 119.0,
+          "speaker": "stone",
+          "target": "all",
+          "placement": "bottom_screen",
+          "text": "Then we are late."
+        },
+        {
+          "type": "dialogue",
+          "start": 119.6,
+          "end": 121.2,
+          "speaker": "fire",
+          "target": "stone",
+          "placement": "bottom_screen",
+          "text": "Late for what?"
+        },
+        {
+          "type": "dialogue",
+          "start": 121.8,
+          "end": 124.6,
+          "speaker": "stone",
+          "target": "fire",
+          "placement": "bottom_screen",
+          "text": "For the choice that made us."
+        },
+        {
+          "type": "pause",
+          "start": 124.6,
+          "end": 125.6
+        },
+        {
+          "type": "dialogue",
+          "start": 125.6,
+          "end": 127.4,
+          "speaker": "earth",
+          "target": "stone",
+          "placement": "bottom_screen",
+          "text": "And if the choice is waiting?"
+        },
+        {
+          "type": "dialogue",
+          "start": 127.9,
+          "end": 130.0,
+          "speaker": "stone",
+          "target": "earth",
+          "placement": "bottom_screen",
+          "text": "Then we answer it together."
+        }
+      ]
+    },
+    {
+      "id": "scene_07_ending_walk",
+      "title": "Ending Walk",
+      "start": 130.0,
+      "end": 140.0,
+      "camera": {
+        "shot": "wide_side_scroll_to_fade",
+        "movement": "follow_into_mist"
+      },
+      "background_fx": [
+        {
+          "type": "mist",
+          "start": 130.0,
+          "end": 140.0,
+          "intensity": 0.55
+        },
+        {
+          "type": "ash",
+          "start": 130.0,
+          "end": 140.0,
+          "intensity": 0.28
+        }
+      ],
+      "events": [
+        {
+          "type": "move",
+          "start": 130.0,
+          "end": 140.0,
+          "direction": "right",
+          "characters": [
+            "stone"
+          ],
+          "speed_profile": {
+            "stone": 0.95
+          },
+          "distance_px": 520
+        },
+        {
+          "type": "move",
+          "start": 130.5,
+          "end": 140.0,
+          "direction": "right",
+          "characters": [
+            "fire",
+            "crystal"
+          ],
+          "speed_profile": {
+            "fire": 1.07,
+            "crystal": 0.98
+          },
+          "distance_px": 500
+        },
+        {
+          "type": "move",
+          "start": 131.0,
+          "end": 140.0,
+          "direction": "right",
+          "characters": [
+            "earth"
+          ],
+          "speed_profile": {
+            "earth": 0.9
+          },
+          "distance_px": 470
+        },
+        {
+          "type": "caption",
+          "start": 132.0,
+          "end": 138.5,
+          "speaker": "narrator",
+          "placement": "bottom_screen",
+          "text": "And so they crossed the silence, not as stone, fire, crystal, and earth... but as one memory returning home."
+        },
+        {
+          "type": "transition",
+          "start": 138.5,
+          "end": 140.0,
+          "name": "fade_to_black"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,550 @@
+version: 1
+
+scene:
+  id: ashen_valley
+  title: Ashen Valley
+  canvas:
+    width: 1536
+    height: 1024
+    units: px
+    origin: top_left
+  mood: cold ash basin with blue crystal glow, dead trees, mist, and wet stone
+  horizon_y: 470
+  player_ground_y: 860
+  safe_center_window:
+    bbox:
+      x: 420
+      y: 360
+      w: 700
+      h: 360
+    purpose: keep this opening mostly clear so the layered valley still reads as deep
+
+default_scene_recipe:
+  notes:
+    - Align the painted panorama plates to the bottom edge.
+    - Mirror-repeat the wide panorama plates instead of hard tiling them.
+    - Use the prop sheets as extracted objects, not as full-width layers.
+    - Foreground rock props repeat on one shared lane with staggered anchors so they never stack on top of each other.
+    - Keep heavy foreground props away from the bright center opening.
+  stack:
+    - sky
+    - far_basin
+    - mid_basin
+    - ground_plane
+    - cloud_mist
+    - foreground_embankments
+    - foreground_rocks
+  instances:
+    - source_layer: foreground_embankments
+      object: left_embankment
+      screen_anchor:
+        x: 0.0
+        y: 1.0
+      scale: 1.0
+      parallax: 0.72
+    - source_layer: foreground_embankments
+      object: right_embankment
+      screen_anchor:
+        x: 1.0
+        y: 1.0
+      scale: 1.0
+      parallax: 0.72
+    - source_layer: foreground_rocks
+      object: cluster_mid_left_heavy
+      screen_anchor:
+        x: 0.02
+        y: 0.98
+      scale: 0.72
+      parallax: 0.88
+      repeat_every: 2176
+    - source_layer: foreground_rocks
+      object: cluster_bottom_left_low
+      screen_anchor:
+        x: 0.29
+        y: 0.99
+      scale: 0.52
+      parallax: 0.88
+      repeat_every: 2176
+    - source_layer: foreground_rocks
+      object: cluster_mid_right_compact
+      screen_anchor:
+        x: 0.58
+        y: 0.98
+      scale: 0.68
+      parallax: 0.88
+      repeat_every: 2176
+    - source_layer: foreground_rocks
+      object: cluster_bottom_right_low
+      screen_anchor:
+        x: 0.90
+        y: 0.99
+      scale: 0.52
+      parallax: 0.88
+      repeat_every: 2176
+  optional_instances:
+    - source_layer: stone_platform
+      object: platform
+      enabled: false
+      screen_anchor:
+        x: 0.50
+        y: 0.82
+      scale: 0.75
+      parallax: 1.0
+      note: only use after removing the white matte from the source image
+
+layers:
+  - id: sky
+    file: sky_1.png
+    role: base_sky
+    parallax: 0.00
+    content_bbox:
+      x: 0
+      y: 0
+      w: 1536
+      h: 1024
+    placement:
+      mode: tile
+      repeat_x: seamless
+      align: top
+      y_offset: 0
+      opacity: 1.0
+    description: stormy ash sky with a bright opening near the center horizon
+    objects:
+      - id: sky_field
+        kind: backdrop
+        bbox:
+          x: 0
+          y: 0
+          w: 1536
+          h: 1024
+      - id: horizon_glow
+        kind: focal_window
+        bbox:
+          x: 363
+          y: 433
+          w: 935
+          h: 374
+        purpose: line up the light source behind the mist and the lake
+
+  - id: cloud_mist
+    file: cloud.png
+    role: fog_pass
+    parallax: 0.26
+    content_bbox:
+      x: 47
+      y: 85
+      w: 1470
+      h: 899
+    placement:
+      mode: panorama_plate
+      repeat_x: mirror
+      overlap_px: 160
+      align: bottom
+      y_offset: -56
+      opacity: 0.0
+    description: low fog pass that sits in front of the basin plates and softens the horizon-to-ground transition
+    objects:
+      - id: upper_wisp
+        kind: cloud_bank
+        bbox:
+          x: 408
+          y: 95
+          w: 343
+          h: 93
+      - id: basin_mist
+        kind: mist_plate
+        bbox:
+          x: 65
+          y: 123
+          w: 1452
+          h: 844
+      - id: mist_horizon_window
+        kind: focal_window
+        bbox:
+          x: 407
+          y: 308
+          w: 806
+          h: 398
+        purpose: keep this aligned with the sky glow and the open water below while veiling the midground
+
+  - id: far_basin
+    file: sky_1.png
+    role: far_background
+    parallax: 0.12
+    content_bbox:
+      x: 0
+      y: 59
+      w: 1536
+      h: 937
+    placement:
+      mode: panorama_plate
+      repeat_x: mirror
+      overlap_px: 180
+      align: bottom
+      y_offset: -240
+      opacity: 0.86
+    description: widest crystalline basin; softer detail makes it read as the farthest terrain plate
+    objects:
+      - id: left_dead_tree_ruins
+        kind: silhouette_cluster
+        bbox:
+          x: 60
+          y: 150
+          w: 400
+          h: 680
+      - id: center_ruined_arch
+        kind: ruin
+        bbox:
+          x: 500
+          y: 300
+          w: 280
+          h: 220
+      - id: center_lake
+        kind: water
+        bbox:
+          x: 420
+          y: 340
+          w: 700
+          h: 430
+      - id: left_lower_crystals
+        kind: crystal_cluster
+        bbox:
+          x: 220
+          y: 560
+          w: 260
+          h: 300
+      - id: right_upper_crystals
+        kind: crystal_cluster
+        bbox:
+          x: 1060
+          y: 210
+          w: 370
+          h: 260
+      - id: right_lower_crystals
+        kind: crystal_cluster
+        bbox:
+          x: 1180
+          y: 620
+          w: 240
+          h: 210
+
+  - id: mid_basin
+    file: epic_background_0.png
+    role: mid_background
+    parallax: 0.20
+    content_bbox:
+      x: 0
+      y: 48
+      w: 1536
+      h: 950
+    placement:
+      mode: panorama_plate
+      repeat_x: mirror
+      overlap_px: 200
+      align: bottom
+      y_offset: 0
+      opacity: 0.96
+    description: darker shoreline and heavier cliff silhouettes; this should sit in front of the far basin
+    objects:
+      - id: left_cliff_mass
+        kind: cliff
+        bbox:
+          x: 60
+          y: 110
+          w: 460
+          h: 800
+      - id: center_ruined_gate
+        kind: ruin
+        bbox:
+          x: 610
+          y: 200
+          w: 260
+          h: 170
+      - id: shoreline_water
+        kind: water
+        bbox:
+          x: 490
+          y: 260
+          w: 740
+          h: 390
+      - id: upper_right_crystals
+        kind: crystal_cluster
+        bbox:
+          x: 1360
+          y: 240
+          w: 150
+          h: 140
+      - id: lower_right_crystals
+        kind: crystal_cluster
+        bbox:
+          x: 1190
+          y: 520
+          w: 250
+          h: 220
+      - id: right_dead_tree
+        kind: tree
+        bbox:
+          x: 1370
+          y: 210
+          w: 150
+          h: 320
+
+  - id: ground_plane
+    file: epic_background_1.png
+    role: near_ground
+    parallax: 0.38
+    content_bbox:
+      x: 0
+      y: 59
+      w: 1536
+      h: 937
+    placement:
+      mode: panorama_plate
+      repeat_x: mirror
+      overlap_px: 180
+      align: bottom
+      y_offset: 200
+      opacity: 1.0
+    description: closer crystalline basin plate used as the near-ground read instead of the flatter shoreline plate
+    objects:
+      - id: left_dead_tree_ruins
+        kind: silhouette_cluster
+        bbox:
+          x: 60
+          y: 150
+          w: 400
+          h: 680
+      - id: center_ruined_arch
+        kind: ruin
+        bbox:
+          x: 500
+          y: 300
+          w: 280
+          h: 220
+      - id: center_lake
+        kind: water
+        bbox:
+          x: 420
+          y: 340
+          w: 700
+          h: 430
+      - id: left_lower_crystals
+        kind: crystal_cluster
+        bbox:
+          x: 220
+          y: 560
+          w: 260
+          h: 300
+      - id: right_upper_crystals
+        kind: crystal_cluster
+        bbox:
+          x: 1060
+          y: 210
+          w: 370
+          h: 260
+      - id: right_lower_crystals
+        kind: crystal_cluster
+        bbox:
+          x: 1180
+          y: 620
+          w: 240
+          h: 210
+
+  - id: foreground_embankments
+    file: details2.png
+    role: foreground_frame_sheet
+    parallax: 0.72
+    content_bbox:
+      x: 18
+      y: 397
+      w: 1505
+      h: 299
+    placement:
+      mode: extract_objects
+      repeat_x: none
+      align: bottom
+      y_offset: 0
+      opacity: 1.0
+    description: large left and right embankments connected by drifting ash; use them to frame the scene edges
+    objects:
+      - id: left_embankment
+        kind: rock_cluster
+        bbox:
+          x: 24
+          y: 397
+          w: 779
+          h: 261
+        pivot:
+          x: 0.02
+          y: 0.95
+        preferred_zone: lower_left_edge
+        suggested_scale:
+          min: 0.95
+          max: 1.10
+      - id: ash_gap
+        kind: dust_transition
+        bbox:
+          x: 596
+          y: 430
+          w: 350
+          h: 230
+        pivot:
+          x: 0.50
+          y: 0.85
+        preferred_zone: lower_center
+        note: use only as a soft seam or haze pass; it is not a solid occluder
+      - id: right_embankment
+        kind: rock_cluster
+        bbox:
+          x: 861
+          y: 432
+          w: 662
+          h: 230
+        pivot:
+          x: 0.98
+          y: 0.95
+        preferred_zone: lower_right_edge
+        suggested_scale:
+          min: 0.95
+          max: 1.10
+
+  - id: foreground_rocks
+    file: details.png
+    role: foreground_prop_sheet
+    parallax: 0.88
+    content_bbox:
+      x: 16
+      y: 216
+      w: 1502
+      h: 743
+    placement:
+      mode: extract_objects
+      repeat_x: none
+      align: bottom
+      y_offset: 0
+      opacity: 1.0
+    description: six foreground rock piles for breakup and occlusion; place them sparsely so the center lane stays readable
+    objects:
+      - id: cluster_top_left_broad
+        kind: rock_cluster
+        bbox:
+          x: 30
+          y: 216
+          w: 726
+          h: 216
+        pivot:
+          x: 0.52
+          y: 0.95
+        preferred_zone: upper_left_foreground
+        suggested_scale:
+          min: 0.45
+          max: 0.70
+      - id: cluster_top_right_tall
+        kind: rock_cluster
+        bbox:
+          x: 882
+          y: 242
+          w: 625
+          h: 193
+        pivot:
+          x: 0.53
+          y: 0.95
+        preferred_zone: upper_right_foreground
+        suggested_scale:
+          min: 0.45
+          max: 0.70
+      - id: cluster_mid_left_heavy
+        kind: rock_cluster
+        bbox:
+          x: 16
+          y: 488
+          w: 664
+          h: 217
+        pivot:
+          x: 0.44
+          y: 0.95
+        preferred_zone: lower_left_foreground
+        suggested_scale:
+          min: 0.60
+          max: 0.85
+      - id: cluster_mid_right_compact
+        kind: rock_cluster
+        bbox:
+          x: 978
+          y: 496
+          w: 534
+          h: 192
+        pivot:
+          x: 0.52
+          y: 0.95
+        preferred_zone: lower_right_foreground
+        suggested_scale:
+          min: 0.58
+          max: 0.82
+      - id: cluster_bottom_left_low
+        kind: rock_cluster
+        bbox:
+          x: 20
+          y: 784
+          w: 652
+          h: 175
+        pivot:
+          x: 0.44
+          y: 0.96
+        preferred_zone: lower_left_or_mid_left
+        suggested_scale:
+          min: 0.45
+          max: 0.65
+      - id: cluster_bottom_right_low
+        kind: rock_cluster
+        bbox:
+          x: 812
+          y: 777
+          w: 706
+          h: 172
+        pivot:
+          x: 0.56
+          y: 0.96
+        preferred_zone: lower_right_or_mid_right
+        suggested_scale:
+          min: 0.45
+          max: 0.65
+
+  - id: stone_platform
+    file: ground.png
+    role: optional_platform
+    enabled_by_default: false
+    parallax: 1.0
+    content_bbox:
+      x: 127
+      y: 440
+      w: 1282
+      h: 193
+    placement:
+      mode: extract_objects
+      repeat_x: none
+      align: bottom
+      y_offset: 0
+      opacity: 1.0
+    preprocess:
+      remove_color_key:
+        color: "#FFFFFF"
+        tolerance: 10
+      crop_to_bbox:
+        x: 127
+        y: 440
+        w: 1282
+        h: 193
+    description: isolated stone platform on an opaque white matte; treat as an optional gameplay platform, not a default parallax plate
+    objects:
+      - id: platform
+        kind: platform
+        bbox:
+          x: 127
+          y: 440
+          w: 1282
+          h: 193
+        pivot:
+          x: 0.50
+          y: 1.00
+        preferred_zone: lower_center
